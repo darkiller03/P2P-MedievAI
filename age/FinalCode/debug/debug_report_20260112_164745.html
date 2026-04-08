@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Report - Tick 50.25</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .summary {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .summary-item {
+            display: inline-block;
+            margin: 10px 20px 10px 0;
+            font-size: 16px;
+        }
+        .summary-item strong {
+            color: #4CAF50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .player1 {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .player2 {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        .hp-bar {
+            display: inline-block;
+            width: 100px;
+            height: 15px;
+            background: #ddd;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            transition: width 0.3s;
+        }
+        .status-alive {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .status-dead {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .events {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .event {
+            padding: 5px;
+            border-left: 3px solid #4CAF50;
+            margin: 5px 0;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 MedievAIl Debug Report</h1>
+    
+    <div class="summary">
+        <div class="summary-item"><strong>Tick:</strong> 50.25</div>
+        <div class="summary-item"><strong>Total Units:</strong> 86</div>
+        <div class="summary-item"><strong>Player 1 Units:</strong> 0</div>
+        <div class="summary-item"><strong>Player 2 Units:</strong> 86</div>
+        <div class="summary-item"><strong>Generated:</strong> 2026-01-12 16:47:45</div>
+    </div>
+    
+    <h2>🎯 AI Generals</h2>
+    <table>
+        <tr>
+            <th>Player</th>
+            <th>AI Type</th>
+            <th>Units Count</th>
+            <th>Strategy</th>
+        </tr>
+
+        <tr>
+            <td class="player1">Player 1</td>
+            <td>New_General_2</td>
+            <td>0</td>
+            <td>Unknown strategy</td>
+        </tr>
+
+        <tr>
+            <td class="player2">Player 2</td>
+            <td>DaftGeneral</td>
+            <td>86</td>
+            <td>Always targets nearest enemy regardless of distance</td>
+        </tr>
+
+    </table>
+    
+    <h2>⚔️ All Units</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Player</th>
+            <th>Type</th>
+            <th>Position</th>
+            <th>HP</th>
+            <th>Attack</th>
+            <th>Range</th>
+            <th>Speed</th>
+            <th>Target</th>
+            <th>Status</th>
+        </tr>
+
+        <tr>
+            <td>103</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.3, 57.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 4.0%"></div>
+                </div>
+                4.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>105</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.3, 57.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>106</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.3, 57.3)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>107</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(46.7, 56.3)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 28.000000000000004%"></div>
+                </div>
+                28.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>108</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(46.9, 57.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>109</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.3, 56.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>110</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.3, 56.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>114</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.5, 56.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>115</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.2, 55.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>118</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(46.3, 57.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 52.0%"></div>
+                </div>
+                52.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>119</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.6, 57.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>120</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.6, 56.3)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 4.0%"></div>
+                </div>
+                4.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>122</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.1, 56.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 52.0%"></div>
+                </div>
+                52.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>123</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(46.9, 55.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 52.0%"></div>
+                </div>
+                52.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>124</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.9, 56.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>126</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.2, 57.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 28.000000000000004%"></div>
+                </div>
+                28.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>128</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.3, 58.3)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>129</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(46.3, 56.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>130</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.8, 56.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>132</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.6, 55.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 4.0%"></div>
+                </div>
+                4.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>133</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.2, 55.9)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 4.0%"></div>
+                </div>
+                4.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>134</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(49.3, 57.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>137</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.8, 57.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>138</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(48.9, 57.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>139</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(46.6, 57.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>140</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(47.4, 57.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                100.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>141</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.3, 54.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>142</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(47.8, 55.9)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>143</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.8, 54.9)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>144</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.5, 57.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>145</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.1, 55.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>146</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.0, 54.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>147</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.0, 57.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>148</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(47.4, 54.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>149</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.7, 57.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>150</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.4, 58.3)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>151</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.1, 54.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>152</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.2, 55.9)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>153</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.8, 56.3)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>154</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.0, 53.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>155</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.7, 55.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>156</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.7, 56.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>157</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(47.2, 54.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>158</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.5, 57.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>159</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.0, 58.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>160</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.2, 56.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>161</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(50.4, 55.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>162</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.2, 55.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>163</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.6, 55.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>164</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.7, 54.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>165</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(47.9, 54.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>166</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.3, 56.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>167</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.3, 55.0)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>168</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.5, 56.0)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>169</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(48.8, 56.2)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>170</td>
+            <td class="player2">P2</td>
+            <td>Pikeman</td>
+            <td>(49.6, 56.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                55.0 / 55.0
+            </td>
+            <td>4.0</td>
+            <td>1.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>171</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.7, 54.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 14.285714285714285%"></div>
+                </div>
+                5.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>172</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(52.2, 54.0)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>173</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(52.4, 54.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>174</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(52.6, 55.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>175</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(52.4, 56.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>176</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.0, 55.9)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>177</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(52.2, 57.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>178</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(52.4, 57.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>179</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(52.9, 57.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>180</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.1, 58.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>181</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.0, 54.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>182</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.5, 55.3)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>183</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(54.5, 55.0)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>184</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(54.1, 55.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>185</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(54.9, 55.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>186</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(54.7, 56.6)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>187</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.1, 57.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>188</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.5, 56.4)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>189</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(54.0, 57.0)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>190</td>
+            <td class="player2">P2</td>
+            <td>Crossbowman</td>
+            <td>(53.7, 57.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                35.0 / 35.0
+            </td>
+            <td>5.0</td>
+            <td>5.0</td>
+            <td>1.0</td>
+            <td>None</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>191</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(64.4, 54.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>192</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(65.1, 54.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>193</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(64.0, 54.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>194</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(65.5, 55.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>195</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(63.8, 55.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>196</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(64.5, 55.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>197</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(65.2, 55.8)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>198</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(65.6, 56.5)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>199</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(66.1, 57.1)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+        <tr>
+            <td>200</td>
+            <td class="player2">P2</td>
+            <td>Monk</td>
+            <td>(66.5, 57.7)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 100.0%"></div>
+                </div>
+                30.0 / 30.0
+            </td>
+            <td>0.0</td>
+            <td>9.0</td>
+            <td>0.7</td>
+            <td>Unit #63</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+    </table>
+    
+    <h2>📜 Recent Events</h2>
+    <div class="events">
+        <div class="event">Unit 63 (P1) died at tick 50.25</div>
+        <div class="event">Unit 76 (P1) died at tick 49.77</div>
+        <div class="event">Unit 52 (P1) died at tick 49.29</div>
+        <div class="event">Unit 95 (P1) died at tick 48.33</div>
+        <div class="event">Unit 91 (P1) died at tick 48.33</div>
+        <div class="event">Unit 71 (P1) died at tick 47.85</div>
+        <div class="event">Unit 93 (P1) died at tick 47.37</div>
+        <div class="event">Unit 58 (P1) died at tick 46.91</div>
+        <div class="event">Unit 85 (P1) died at tick 45.74</div>
+        <div class="event">Unit 55 (P1) died at tick 45.74</div>
+        <div class="event">Unit 92 (P1) died at tick 45.74</div>
+        <div class="event">Unit 54 (P1) died at tick 45.29</div>
+        <div class="event">Unit 97 (P1) died at tick 45.29</div>
+        <div class="event">Unit 96 (P1) died at tick 44.79</div>
+        <div class="event">Unit 84 (P1) died at tick 44.31</div>
+        <div class="event">Unit 94 (P1) died at tick 43.82</div>
+        <div class="event">Unit 98 (P1) died at tick 43.33</div>
+        <div class="event">Unit 99 (P1) died at tick 42.86</div>
+        <div class="event">Unit 77 (P1) died at tick 42.86</div>
+        <div class="event">Unit 41 (P1) died at tick 42.40</div>
+        <div class="event">Unit 42 (P1) died at tick 41.94</div>
+        <div class="event">Unit 87 (P1) died at tick 41.47</div>
+        <div class="event">Unit 81 (P1) died at tick 41.00</div>
+        <div class="event">Unit 73 (P1) died at tick 41.00</div>
+        <div class="event">Unit 66 (P1) died at tick 41.00</div>
+        <div class="event">Unit 100 (P1) died at tick 41.00</div>
+        <div class="event">Unit 68 (P1) died at tick 41.00</div>
+        <div class="event">Unit 67 (P1) died at tick 40.52</div>
+        <div class="event">Unit 86 (P1) died at tick 40.02</div>
+        <div class="event">Unit 90 (P1) died at tick 39.19</div>
+        <div class="event">Unit 56 (P1) died at tick 38.95</div>
+        <div class="event">Unit 51 (P1) died at tick 38.23</div>
+        <div class="event">Unit 75 (P1) died at tick 38.23</div>
+        <div class="event">Unit 88 (P1) died at tick 37.99</div>
+        <div class="event">Unit 127 (P2) died at tick 37.87</div>
+        <div class="event">Unit 64 (P1) died at tick 37.75</div>
+        <div class="event">Unit 83 (P1) died at tick 36.80</div>
+        <div class="event">Unit 47 (P1) died at tick 35.97</div>
+        <div class="event">Unit 82 (P1) died at tick 35.17</div>
+        <div class="event">Unit 89 (P1) died at tick 35.05</div>
+        <div class="event">Unit 59 (P1) died at tick 34.56</div>
+        <div class="event">Unit 65 (P1) died at tick 34.44</div>
+        <div class="event">Unit 72 (P1) died at tick 34.32</div>
+        <div class="event">Unit 60 (P1) died at tick 34.21</div>
+        <div class="event">Unit 62 (P1) died at tick 33.85</div>
+        <div class="event">Unit 39 (P1) died at tick 33.50</div>
+        <div class="event">Unit 74 (P1) died at tick 32.67</div>
+        <div class="event">Unit 136 (P2) died at tick 32.31</div>
+        <div class="event">Unit 61 (P1) died at tick 31.95</div>
+        <div class="event">Unit 79 (P1) died at tick 31.45</div>
+
+    </div>
+    
+</body>
+</html>
