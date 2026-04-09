@@ -1,0 +1,63 @@
+main.c
+
+Program entry.
+
+Responsibilities:
+
+initialize network
+connect peers
+start main loop
+network.c
+
+Handles:
+
+sockets
+select()
+sending messages
+receiving messages
+peer.c
+
+Stores connected players.
+
+Example:
+
+peer list
+peer add
+peer remove
+protocol.c
+
+Handles message format.
+
+Example messages:
+
+JOIN
+MOVE
+ATTACK
+REQUEST
+GRANT
+UPDATE
+
+Parsing happens here.
+
+ipc.c
+
+Communication between:
+
+Python ↔ C
+
+Simplest solution:
+
+local TCP socket
+
+Python connects to:
+
+localhost:6000
+utils.c
+
+Helper functions.
+
+Example:
+
+print logs
+string helpers
+error handling
