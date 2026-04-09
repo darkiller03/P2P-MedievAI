@@ -206,3 +206,42 @@ def echelon_scenario(engine: "SimpleEngine", offset=10):
                     **type_stats[unit_type]
                 )
                 unit_idx += 1
+
+
+def tiny_scenario(engine: "SimpleEngine", offset=5):
+    """Minimal test scenario: 2 units per player for fast network testing."""
+    mid_x = engine.w / 2
+    mid_y = engine.h / 2
+
+    type_stats = {
+        "Pikeman": {"hp": 55, "attack": 4, "reload_time": 3.0, "range": 1.0, "speed": 1.0, "tags": ["infantry"]},
+        "Crossbowman": {"hp": 35, "attack": 5, "reload_time": 2.0, "range": 5.0, "speed": 0.96, "tags": ["archer"]},
+    }
+
+    type_colors = {
+        1: {"Pikeman": (255, 100, 50), "Crossbowman": (255, 50, 50)},
+        2: {"Pikeman": (50, 150, 255), "Crossbowman": (100, 200, 255)},
+    }
+
+    for player in [1, 2]:
+        side_dir = 1 if player == 1 else -1
+        base_x = mid_x - (offset * side_dir)
+        
+        # Spawn 1 Pikeman and 1 Crossbowman per player
+        engine.spawn_unit(
+            player=player, 
+            x=base_x - 0 * side_dir,
+            y=mid_y - 1,
+            unit_type="Pikeman",
+            color=type_colors[player]["Pikeman"],
+            **type_stats["Pikeman"]
+        )
+        
+        engine.spawn_unit(
+            player=player,
+            x=base_x - 1.5 * side_dir,
+            y=mid_y + 1,
+            unit_type="Crossbowman",
+            color=type_colors[player]["Crossbowman"],
+            **type_stats["Crossbowman"]
+        )

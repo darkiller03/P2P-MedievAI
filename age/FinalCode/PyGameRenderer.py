@@ -14,12 +14,13 @@ camera_speed = 10.0
 
 def clamp(v, a, b): return max(a, min(b, v))
 class PygameRenderer:
-    def __init__(self, engine: SimpleEngine, generals: Dict[int, General]):
+    def __init__(self, engine: SimpleEngine, generals: Dict[int, General], net_bridge=None):
         if pygame is None:
             raise RuntimeError("Pygame not installed.")
         pygame.init()
         self.engine = engine
         self.generals = generals
+        self.net_bridge = net_bridge  # Network bridge for multiplayer sync
         
         # Set fullscreen mode
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -512,7 +513,16 @@ class PygameRenderer:
             if not self.paused and not self.game_over:
                 sim_dt = dt_real * self.speed_multiplier
                 sim_dt = min(sim_dt, 0.5)
+                
+                # Network: process incoming messages BEFORE step
+                if self.net_bridge:
+                    self.net_bridge.integrate_network(self.engine)
+                
                 self.engine.step(sim_dt, self.generals)
+                
+                # Network: send local actions AFTER step
+                if self.net_bridge:
+                    self.net_bridge.publish_local_actions(self.engine)
             
             # Render
             self.screen.fill((0,0,0))

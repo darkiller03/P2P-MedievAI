@@ -13,85 +13,22 @@
 #pragma comment(lib, "Ws2_32.lib")
 #endif
 
-#define MAX_CLIENTS FD_SETSIZE
-#define RECV_CHUNK 1024
-#define LINE_BUFFER 8192
+#define RECV_CHUNK 2048
+#define INITIAL_LINE_CAP 1024
 
-typedef struct Client {
+typedef struct Connection {
     SOCKET socket;
-    char addr_text[64];
-    char buffer[LINE_BUFFER];
-    int buffer_len;
-    bool active;
-} Client;
+    char label[64];
+    char *line_buffer;
+    size_t line_len;
+    size_t line_cap;
+} Connection;
 
-static int g_client_count = 0;
-
-static void close_client(Client *c) {
-    if (!c->active) {
-        return;
-    }
-
-    closesocket(c->socket);
-    c->active = false;
-    c->buffer_len = 0;
-    c->addr_text[0] = '\0';
-    g_client_count--;
-}
-
-static int send_all(SOCKET s, const char *data, int len) {
-    int total = 0;
-    while (total < len) {
-        int sent = send(s, data + total, len - total, 0);
-        if (sent == SOCKET_ERROR) {
-            return SOCKET_ERROR;
-        }
-        total += sent;
-    }
-    return total;
-}
-
-static void broadcast_line(Client clients[], int sender_index, const char *line, int line_len) {
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (!clients[i].active) {
-            continue;
-        }
-        if (i == sender_index) {
-            continue;
-        }
-
-        if (send_all(clients[i].socket, line, line_len) == SOCKET_ERROR) {
-            printf("[WARN] send failed to %s, dropping client\n", clients[i].addr_text);
-            close_client(&clients[i]);
-        }
-    }
-}
-
-static void handle_complete_line(Client clients[], int sender_index, const char *line, int line_len) {
-    printf("[RECV] %s -> %.*s", clients[sender_index].addr_text, line_len - 1, line);
-    broadcast_line(clients, sender_index, line, line_len);
-}
-
-static void process_incoming_bytes(Client clients[], int sender_index, const char *data, int data_len) {
-    Client *sender = &clients[sender_index];
-
-    for (int i = 0; i < data_len; i++) {
-        char ch = data[i];
-
-        if (sender->buffer_len >= LINE_BUFFER - 1) {
-            printf("[WARN] line too long from %s, dropping partial line\n", sender->addr_text);
-            sender->buffer_len = 0;
-        }
-
-        sender->buffer[sender->buffer_len++] = ch;
-
-        if (ch == '\n') {
-            sender->buffer[sender->buffer_len] = '\0';
-            handle_complete_line(clients, sender_index, sender->buffer, sender->buffer_len);
-            sender->buffer_len = 0;
-        }
-    }
-}
+typedef struct ConnectionList {
+    Connection *items;
+    size_t count;
+    size_t cap;
+} ConnectionList;
 
 static bool init_winsock(void) {
     WSADATA wsa_data;
@@ -103,7 +40,158 @@ static bool init_winsock(void) {
     return true;
 }
 
-static SOCKET create_listen_socket(unsigned short port) {
+static bool parse_port(const char *text, unsigned short *port_out) {
+    long value = strtol(text, NULL, 10);
+    if (value <= 0 || value > 65535) {
+        return false;
+    }
+    *port_out = (unsigned short)value;
+    return true;
+}
+
+static bool parse_peer_target(const char *peer, char *ip_out, size_t ip_out_size, unsigned short *port_out) {
+    const char *sep = strrchr(peer, ':');
+    if (sep == NULL) {
+        return false;
+    }
+
+    size_t ip_len = (size_t)(sep - peer);
+    if (ip_len == 0 || ip_len >= ip_out_size) {
+        return false;
+    }
+
+    memcpy(ip_out, peer, ip_len);
+    ip_out[ip_len] = '\0';
+
+    return parse_port(sep + 1, port_out);
+}
+
+static bool ensure_connection_capacity(ConnectionList *list) {
+    if (list->count < list->cap) {
+        return true;
+    }
+
+    size_t next_cap = (list->cap == 0) ? 16 : list->cap * 2;
+    Connection *next = (Connection *)realloc(list->items, next_cap * sizeof(Connection));
+    if (next == NULL) {
+        return false;
+    }
+
+    list->items = next;
+    list->cap = next_cap;
+    return true;
+}
+
+static bool append_connection(ConnectionList *list, SOCKET sock, const char *label) {
+    if (!ensure_connection_capacity(list)) {
+        return false;
+    }
+
+    Connection *c = &list->items[list->count];
+    c->socket = sock;
+    c->line_cap = INITIAL_LINE_CAP;
+    c->line_len = 0;
+    c->line_buffer = (char *)malloc(c->line_cap);
+    if (c->line_buffer == NULL) {
+        return false;
+    }
+    c->line_buffer[0] = '\0';
+    _snprintf_s(c->label, sizeof(c->label), _TRUNCATE, "%s", label);
+
+    list->count++;
+    return true;
+}
+
+static void remove_connection(ConnectionList *list, size_t index) {
+    if (index >= list->count) {
+        return;
+    }
+
+    Connection *c = &list->items[index];
+    printf("[INFO] disconnected: %s\n", c->label);
+    closesocket(c->socket);
+    free(c->line_buffer);
+
+    if (index != list->count - 1) {
+        list->items[index] = list->items[list->count - 1];
+    }
+    list->count--;
+}
+
+static int send_all(SOCKET sock, const char *data, int len) {
+    int sent_total = 0;
+    while (sent_total < len) {
+        int sent_now = send(sock, data + sent_total, len - sent_total, 0);
+        if (sent_now == SOCKET_ERROR) {
+            return SOCKET_ERROR;
+        }
+        sent_total += sent_now;
+    }
+    return sent_total;
+}
+
+static void broadcast_message(ConnectionList *list, size_t sender_index, const char *line, int line_len) {
+    size_t i = 0;
+    while (i < list->count) {
+        if (i == sender_index) {
+            i++;
+            continue;
+        }
+
+        Connection *peer = &list->items[i];
+        if (send_all(peer->socket, line, line_len) == SOCKET_ERROR) {
+            printf("[WARN] send failed to %s (err=%d)\n", peer->label, WSAGetLastError());
+            remove_connection(list, i);
+            if (sender_index == list->count) {
+                break;
+            }
+            if (i < sender_index) {
+                sender_index--;
+            }
+            continue;
+        }
+        i++;
+    }
+}
+
+static bool grow_line_buffer(Connection *c) {
+    size_t next_cap = c->line_cap * 2;
+    char *next = (char *)realloc(c->line_buffer, next_cap);
+    if (next == NULL) {
+        return false;
+    }
+    c->line_buffer = next;
+    c->line_cap = next_cap;
+    return true;
+}
+
+static bool handle_incoming_data(ConnectionList *list, size_t sender_index, const char *data, int len) {
+    Connection *sender = &list->items[sender_index];
+
+    for (int i = 0; i < len; i++) {
+        char ch = data[i];
+
+        if (sender->line_len + 1 >= sender->line_cap) {
+            if (!grow_line_buffer(sender)) {
+                printf("[ERROR] out of memory growing line buffer for %s\n", sender->label);
+                return false;
+            }
+        }
+
+        sender->line_buffer[sender->line_len++] = ch;
+
+        if (ch == '\n') {
+            sender->line_buffer[sender->line_len] = '\0';
+            printf("[RECV] %s -> %s", sender->label, sender->line_buffer);
+            broadcast_message(list, sender_index, sender->line_buffer, (int)sender->line_len);
+            sender->line_len = 0;
+        }
+    }
+
+    return true;
+}
+
+static SOCKET init_server(unsigned short listen_port) {
     SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listen_sock == INVALID_SOCKET) {
         printf("[ERROR] socket failed: %d\n", WSAGetLastError());
@@ -112,23 +200,23 @@ static SOCKET create_listen_socket(unsigned short port) {
 
     BOOL opt = TRUE;
     if (setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt)) == SOCKET_ERROR) {
-        printf("[WARN] setsockopt SO_REUSEADDR failed: %d\n", WSAGetLastError());
+        printf("[WARN] SO_REUSEADDR failed: %d\n", WSAGetLastError());
     }
 
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(port);
+    addr.sin_port = htons(listen_port);
 
     if (bind(listen_sock, (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
-        printf("[ERROR] bind failed: %d\n", WSAGetLastError());
+        printf("[ERROR] bind failed on port %u (err=%d)\n", listen_port, WSAGetLastError());
         closesocket(listen_sock);
         return INVALID_SOCKET;
     }
 
     if (listen(listen_sock, SOMAXCONN) == SOCKET_ERROR) {
-        printf("[ERROR] listen failed: %d\n", WSAGetLastError());
+        printf("[ERROR] listen failed (err=%d)\n", WSAGetLastError());
         closesocket(listen_sock);
         return INVALID_SOCKET;
     }
@@ -136,133 +224,174 @@ static SOCKET create_listen_socket(unsigned short port) {
     return listen_sock;
 }
 
-static void accept_client(SOCKET listen_sock, Client clients[]) {
+static bool accept_new_connection(SOCKET listen_sock, ConnectionList *list) {
     struct sockaddr_in addr;
     int addr_len = sizeof(addr);
-    SOCKET client_sock = accept(listen_sock, (struct sockaddr *)&addr, &addr_len);
-    if (client_sock == INVALID_SOCKET) {
-        printf("[WARN] accept failed: %d\n", WSAGetLastError());
-        return;
+    SOCKET incoming = accept(listen_sock, (struct sockaddr *)&addr, &addr_len);
+    if (incoming == INVALID_SOCKET) {
+        printf("[WARN] accept failed (err=%d)\n", WSAGetLastError());
+        return false;
     }
 
-    int slot = -1;
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (!clients[i].active) {
-            slot = i;
-            break;
-        }
+    char label[64];
+    _snprintf_s(label, sizeof(label), _TRUNCATE, "%s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+
+    if (!append_connection(list, incoming, label)) {
+        printf("[ERROR] cannot track new connection %s\n", label);
+        closesocket(incoming);
+        return false;
     }
 
-    if (slot < 0) {
-        printf("[WARN] max clients reached, rejecting new connection\n");
-        closesocket(client_sock);
-        return;
-    }
-
-    clients[slot].socket = client_sock;
-    clients[slot].active = true;
-    clients[slot].buffer_len = 0;
-    _snprintf_s(clients[slot].addr_text, sizeof(clients[slot].addr_text), _TRUNCATE, "%s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-    g_client_count++;
-
-    printf("[INFO] client connected: %s (total=%d)\n", clients[slot].addr_text, g_client_count);
+    printf("[INFO] accepted connection: %s (total=%llu)\n", label, (unsigned long long)list->count);
+    return true;
 }
 
-static void run_server_loop(SOCKET listen_sock) {
-    Client *clients = (Client *)calloc(MAX_CLIENTS, sizeof(Client));
-    if (clients == NULL) {
-        printf("[ERROR] could not allocate client table\n");
-        return;
+static bool connect_to_peer(ConnectionList *list, const char *ip, unsigned short port) {
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sock == INVALID_SOCKET) {
+        printf("[WARN] socket() failed for peer %s:%u\n", ip, port);
+        return false;
     }
 
-    printf("[INFO] relay running. Messages are newline-delimited text.\n");
-    printf("[INFO] Example: MOVE|player1|10|5\n");
-    printf("[INFO] Press Ctrl+C to stop.\n");
+    struct sockaddr_in peer_addr;
+    memset(&peer_addr, 0, sizeof(peer_addr));
+    peer_addr.sin_family = AF_INET;
+    peer_addr.sin_port = htons(port);
+
+    if (inet_pton(AF_INET, ip, &peer_addr.sin_addr) != 1) {
+        printf("[WARN] invalid peer address: %s\n", ip);
+        closesocket(sock);
+        return false;
+    }
+
+    if (connect(sock, (struct sockaddr *)&peer_addr, sizeof(peer_addr)) == SOCKET_ERROR) {
+        printf("[WARN] connect failed to %s:%u (err=%d)\n", ip, port, WSAGetLastError());
+        closesocket(sock);
+        return false;
+    }
+
+    char label[64];
+    _snprintf_s(label, sizeof(label), _TRUNCATE, "%s:%u", ip, port);
+
+    if (!append_connection(list, sock, label)) {
+        printf("[ERROR] cannot track outbound peer %s\n", label);
+        closesocket(sock);
+        return false;
+    }
+
+    printf("[INFO] connected to peer: %s (total=%llu)\n", label, (unsigned long long)list->count);
+    return true;
+}
+
+static void free_connection_list(ConnectionList *list) {
+    for (size_t i = 0; i < list->count; i++) {
+        closesocket(list->items[i].socket);
+        free(list->items[i].line_buffer);
+    }
+    free(list->items);
+    list->items = NULL;
+    list->count = 0;
+    list->cap = 0;
+}
+
+static void run_event_loop(SOCKET listen_sock, ConnectionList *connections) {
+    printf("[INFO] P2P node started.\n");
+    printf("[INFO] newline-delimited protocol examples:\n");
+    printf("[INFO]   MOVE|player1|10|5\n");
+    printf("[INFO]   ATTACK|player1|enemy2\n");
 
     while (1) {
         fd_set read_set;
         FD_ZERO(&read_set);
         FD_SET(listen_sock, &read_set);
-        SOCKET max_fd = listen_sock;
 
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (clients[i].active) {
-                FD_SET(clients[i].socket, &read_set);
-                if (clients[i].socket > max_fd) {
-                    max_fd = clients[i].socket;
-                }
-            }
+        for (size_t i = 0; i < connections->count; i++) {
+            FD_SET(connections->items[i].socket, &read_set);
         }
 
-        int ready = select((int)(max_fd + 1), &read_set, NULL, NULL, NULL);
+        int ready = select(0, &read_set, NULL, NULL, NULL);
         if (ready == SOCKET_ERROR) {
             printf("[ERROR] select failed: %d\n", WSAGetLastError());
             break;
         }
 
         if (FD_ISSET(listen_sock, &read_set)) {
-            accept_client(listen_sock, clients);
+            accept_new_connection(listen_sock, connections);
         }
 
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (!clients[i].active) {
-                continue;
-            }
-            if (!FD_ISSET(clients[i].socket, &read_set)) {
+        size_t i = 0;
+        while (i < connections->count) {
+            Connection *c = &connections->items[i];
+            if (!FD_ISSET(c->socket, &read_set)) {
+                i++;
                 continue;
             }
 
             char recv_buf[RECV_CHUNK];
-            int received = recv(clients[i].socket, recv_buf, sizeof(recv_buf), 0);
+            int n = recv(c->socket, recv_buf, sizeof(recv_buf), 0);
 
-            if (received == 0) {
-                printf("[INFO] client disconnected: %s\n", clients[i].addr_text);
-                close_client(&clients[i]);
+            if (n == 0) {
+                remove_connection(connections, i);
                 continue;
             }
 
-            if (received == SOCKET_ERROR) {
-                printf("[WARN] recv error from %s: %d\n", clients[i].addr_text, WSAGetLastError());
-                close_client(&clients[i]);
+            if (n == SOCKET_ERROR) {
+                printf("[WARN] recv error from %s (err=%d)\n", c->label, WSAGetLastError());
+                remove_connection(connections, i);
                 continue;
             }
 
-            process_incoming_bytes(clients, i, recv_buf, received);
+            if (!handle_incoming_data(connections, i, recv_buf, n)) {
+                remove_connection(connections, i);
+                continue;
+            }
+
+            i++;
         }
     }
-
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        close_client(&clients[i]);
-    }
-
-    free(clients);
 }
 
 int main(int argc, char *argv[]) {
-    unsigned short port = 9000;
+    if (argc < 2) {
+        printf("Usage: %s <listen_port> [peer_ip:peer_port ...]\n", argv[0]);
+        printf("Example: %s 9001 127.0.0.1:9002 127.0.0.1:9003\n", argv[0]);
+        return 1;
+    }
 
-    if (argc >= 2) {
-        int parsed = atoi(argv[1]);
-        if (parsed <= 0 || parsed > 65535) {
-            printf("Usage: %s [port]\n", argv[0]);
-            return 1;
-        }
-        port = (unsigned short)parsed;
+    unsigned short listen_port = 0;
+    if (!parse_port(argv[1], &listen_port)) {
+        printf("[ERROR] invalid listen port: %s\n", argv[1]);
+        return 1;
     }
 
     if (!init_winsock()) {
         return 1;
     }
 
-    SOCKET listen_sock = create_listen_socket(port);
+    SOCKET listen_sock = init_server(listen_port);
     if (listen_sock == INVALID_SOCKET) {
         WSACleanup();
         return 1;
     }
 
-    printf("[INFO] listening on 0.0.0.0:%u\n", port);
-    run_server_loop(listen_sock);
+    printf("[INFO] listening on 0.0.0.0:%u\n", listen_port);
 
+    ConnectionList connections;
+    memset(&connections, 0, sizeof(connections));
+
+    for (int i = 2; i < argc; i++) {
+        char peer_ip[64];
+        unsigned short peer_port = 0;
+        if (!parse_peer_target(argv[i], peer_ip, sizeof(peer_ip), &peer_port)) {
+            printf("[WARN] skip invalid peer target: %s\n", argv[i]);
+            continue;
+        }
+        connect_to_peer(&connections, peer_ip, peer_port);
+    }
+
+    run_event_loop(listen_sock, &connections);
+
+    free_connection_list(&connections);
     closesocket(listen_sock);
     WSACleanup();
     return 0;

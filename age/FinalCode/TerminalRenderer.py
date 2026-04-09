@@ -20,11 +20,12 @@ def clamp(v, a, b): return max(a, min(b, v))
 FPS = 20
 camera_speed = 10.0
 class TerminalRenderer:
-    def __init__(self, engine: SimpleEngine, generals: Dict[int, General]):
+    def __init__(self, engine: SimpleEngine, generals: Dict[int, General], net_bridge=None):
         if curses is None:
             raise RuntimeError("curses not available on this system")
         self.engine = engine
         self.generals = generals
+        self.net_bridge = net_bridge  # Network bridge for multiplayer sync
         self.cam_x = max(0, engine.w//2 - 20)
         self.cam_y = max(0, engine.h//2 - 10)
         self.speed_multiplier = 1.0
@@ -266,7 +267,17 @@ class TerminalRenderer:
             if not self.paused:
                 sim_dt = dt * self.speed_multiplier
                 sim_dt = min(sim_dt, 0.5)
+                
+                # Network: process incoming messages BEFORE step
+                if self.net_bridge:
+                    self.net_bridge.integrate_network(self.engine)
+                
                 self.engine.step(sim_dt, self.generals)
+                
+                # Network: send local actions AFTER step
+                if self.net_bridge:
+                    self.net_bridge.publish_local_actions(self.engine)
+                    
             self.draw(stdscr)
         return 'quit'
 
