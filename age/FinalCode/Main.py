@@ -44,6 +44,9 @@ class NetworkBridgeV2:
         self._last_sent_positions: Dict[int, Tuple[float, float]] = {}
         self._last_sent_targets: Dict[int, Optional[int]] = {}
         self._init_integrator = False
+        self._join_announced = False
+        self._coherence_check_interval = 30  # Check coherence every 30 ticks
+        self._tick_counter = 0
 
     def connect(self) -> None:
         self.client.connect()
@@ -71,7 +74,20 @@ class NetworkBridgeV2:
         if self._last_processed_tick == engine.tick:
             return
 
+        # First time: announce arrival
+        if not self._join_announced:
+            self.integrator.announce_join()
+            self.integrator.request_full_state_from_remote()
+            self._join_announced = True
+        
+        # Process incoming messages
         self.integrator.integrate_network()
+        
+        # Periodically verify state coherence
+        self._tick_counter += 1
+        if self._tick_counter % self._coherence_check_interval == 0:
+            self.integrator.publish_state_hash()
+        
         self._last_processed_tick = engine.tick
 
     def send_ai_action(self, action: Dict) -> None:
