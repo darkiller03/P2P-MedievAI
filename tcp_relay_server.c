@@ -20,11 +20,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    socket_t listen_sock = init_server(listen_port);
-    if (listen_sock == SOCKET_INVALID) {
-#ifdef _WIN32
-        WSACleanup();
-#endif
+    int listen_sock = init_server(listen_port);
+    if (listen_sock == -1) {
         return 1;
     }
 
@@ -46,9 +43,6 @@ int main(int argc, char *argv[]) {
     run_event_loop(listen_sock, &connections);
 
     free_connection_list(&connections);
-    socket_close(listen_sock);
-#ifdef _WIN32
-    WSACleanup();
-#endif
+    close(listen_sock);
     return 0;
 }
