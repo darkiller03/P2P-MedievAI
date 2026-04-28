@@ -10,6 +10,7 @@ from Generals import DaftGeneral, BrainDeadGeneral, New_General_1, New_General_2
 from Scenario_lanchester import lanchester_scenario
 from battle_plot import generate_lanchester_plot
 from p2p_client import P2PClient
+from network_integration import NetworkIntegrator, OwnershipTracker
 
 
 class PassiveGeneral:
@@ -22,20 +23,27 @@ class PassiveGeneral:
         _ = engine
 
 
-class NetworkBridge:
+class NetworkBridgeV2:
     """
-    Bridges engine state and local C P2P node.
-
-    - inbound: drains async queue without blocking game loop
-    - outbound: publishes local player's unit updates
+    V2 Network bridge with complete ownership workflow.
+    
+    Phases:
+    1) Request: local player requests ownership of remote unit
+    2) Verify: remote owner checks if action is valid
+    3) Grant: remote owner grants ownership with state snapshot
+    4) Execute: local player performs verified action
+    5) Publish: all players receive updated state
     """
 
     def __init__(self, host: str, port: int, local_player: int):
         self.client = P2PClient(host=host, port=port)
         self.local_player = local_player
+        self.ownership = OwnershipTracker(local_player=local_player)
+        self.integrator: Optional[NetworkIntegrator] = None
         self._last_processed_tick: Optional[float] = None
         self._last_sent_positions: Dict[int, Tuple[float, float]] = {}
         self._last_sent_targets: Dict[int, Optional[int]] = {}
+        self._init_integrator = False
 
     def connect(self) -> None:
         self.client.connect()
@@ -44,189 +52,58 @@ class NetworkBridge:
 
     def close(self) -> None:
         self.client.close()
+    
+    def _ensure_integrator(self, engine: SimpleEngine) -> None:
+        """Lazy-init integrator once we have engine."""
+        if not self._init_integrator:
+            self.integrator = NetworkIntegrator(
+                engine=engine,
+                client=self.client,
+                ownership=self.ownership,
+                local_player=self.local_player
+            )
+            self._init_integrator = True
 
     def integrate_network(self, engine: SimpleEngine) -> None:
-        # Engine calls generals for multiple players at same tick. Process queue once/tick.
+        """Process one tick of network messages."""
+        self._ensure_integrator(engine)
+        
         if self._last_processed_tick == engine.tick:
             return
 
-        while True:
-            raw = self.client.try_get_message()
-            if raw is None:
-                break
-            self.process_incoming_message(raw, engine)
-
+        self.integrator.integrate_network()
         self._last_processed_tick = engine.tick
 
-    def send_ai_action(self, msg: str) -> None:
-        self.client.send_message(msg)
+    def send_ai_action(self, action: Dict) -> None:
+        """Send action with ownership verification."""
+        self.integrator.send_action_with_ownership(action)
 
     def publish_local_actions(self, engine: SimpleEngine) -> None:
+        """Publish state of local player's units."""
+        if not self.integrator:
+            return
+        
         for u in engine.get_units_for_player(self.local_player):
-            # Authoritative per-unit state replication keeps both simulations aligned.
-            self.send_ai_action(
-                f"STATE|player{u.player}|{u.id}|{u.x:.3f}|{u.y:.3f}|{u.hp:.3f}|{1 if u.alive else 0}|{u.target_id if u.target_id is not None else -1}"
-            )
+            # Only publish if we own it
+            if self.ownership.can_modify_local(u.id):
+                self.integrator.publish_unit_state(u.id)
+                
+                prev_pos = self._last_sent_positions.get(u.id)
+                current_pos = (round(u.x, 2), round(u.y, 2))
+                if prev_pos != current_pos:
+                    self.client.send_message(f"MOVE|{u.id}|{current_pos[0]}|{current_pos[1]}")
+                    self._last_sent_positions[u.id] = current_pos
 
-            prev_pos = self._last_sent_positions.get(u.id)
-            current_pos = (round(u.x, 2), round(u.y, 2))
-            if prev_pos != current_pos:
-                self.send_ai_action(
-                    f"MOVE|player{u.player}|{u.id}|{current_pos[0]}|{current_pos[1]}"
-                )
-                self._last_sent_positions[u.id] = current_pos
-
-            prev_target = self._last_sent_targets.get(u.id)
-            if u.target_id is not None and prev_target != u.target_id:
-                self.send_ai_action(f"ATTACK|player{u.player}|{u.id}|{u.target_id}")
-                self._last_sent_targets[u.id] = u.target_id
-
-    def process_incoming_message(self, msg: str, engine: SimpleEngine) -> None:
-        parts = msg.strip().split('|')
-        if not parts:
-            return
-
-        kind = parts[0].upper()
-        if kind == 'HELLO':
-            return
-
-        if kind == 'MOVE':
-            self._handle_move(parts, engine)
-            return
-
-        if kind == 'ATTACK':
-            self._handle_attack(parts, engine)
-            return
-
-        if kind == 'STATE':
-            self._handle_state(parts, engine)
-            return
-
-        if kind in ('REQUEST_OWNERSHIP', 'GRANT_OWNERSHIP'):
-            # Ownership can be layered later without blocking base integration.
-            return
-
-    def move_unit(self, engine: SimpleEngine, unit_id: int, x: float, y: float) -> None:
-        unit = engine.units_by_id.get(unit_id)
-        if unit is None or not unit.alive:
-            return
-        unit.x = x
-        unit.y = y
-
-    def attack_unit(self, engine: SimpleEngine, attacker_id: int, target_id: int) -> None:
-        attacker = engine.units_by_id.get(attacker_id)
-        if attacker is None or not attacker.alive:
-            return
-
-        target = engine.units_by_id.get(target_id)
-        if target is None or not target.alive:
-            return
-
-        attacker.target_id = target.id
-
-    def _handle_move(self, parts: List[str], engine: SimpleEngine) -> None:
-        # Preferred format: MOVE|playerX|unit_id|x|y
-        if len(parts) == 5:
-            player_id = self._parse_player(parts[1])
-            if player_id is None or player_id == self.local_player:
-                return
-            unit_id = self._parse_int(parts[2])
-            x = self._parse_float(parts[3])
-            y = self._parse_float(parts[4])
-            if unit_id is None or x is None or y is None:
-                return
-            self.move_unit(engine, unit_id, x, y)
-            return
-
-        # Legacy format fallback: MOVE|playerX|x|y
-        if len(parts) == 4:
-            player_id = self._parse_player(parts[1])
-            x = self._parse_float(parts[2])
-            y = self._parse_float(parts[3])
-            if player_id is None or x is None or y is None:
-                return
-            units = engine.get_units_for_player(player_id)
-            if units:
-                self.move_unit(engine, units[0].id, x, y)
-
-    def _handle_attack(self, parts: List[str], engine: SimpleEngine) -> None:
-        # Preferred format: ATTACK|playerX|attacker_id|target_id
-        if len(parts) == 4:
-            player_id = self._parse_player(parts[1])
-            if player_id is None or player_id == self.local_player:
-                return
-            attacker_id = self._parse_int(parts[2])
-            target_id = self._parse_int(parts[3])
-            if attacker_id is None or target_id is None:
-                return
-            self.attack_unit(engine, attacker_id, target_id)
-            return
-
-        # Legacy format fallback: ATTACK|playerX|target_id
-        if len(parts) == 3:
-            player_id = self._parse_player(parts[1])
-            target_id = self._parse_int(parts[2])
-            if player_id is None or target_id is None:
-                return
-            units = engine.get_units_for_player(player_id)
-            if units:
-                self.attack_unit(engine, units[0].id, target_id)
-
-    def _handle_state(self, parts: List[str], engine: SimpleEngine) -> None:
-        # Format: STATE|playerX|unit_id|x|y|hp|alive|target_id
-        if len(parts) != 8:
-            return
-
-        player_id = self._parse_player(parts[1])
-        if player_id is None or player_id == self.local_player:
-            return
-
-        unit_id = self._parse_int(parts[2])
-        x = self._parse_float(parts[3])
-        y = self._parse_float(parts[4])
-        hp = self._parse_float(parts[5])
-        alive_flag = self._parse_int(parts[6])
-        target_id = self._parse_int(parts[7])
-
-        if unit_id is None or x is None or y is None or hp is None or alive_flag is None:
-            return
-
-        unit = engine.units_by_id.get(unit_id)
-        if unit is None:
-            return
-
-        unit.x = x
-        unit.y = y
-        unit.hp = hp
-        unit.alive = alive_flag == 1
-        unit.target_id = None if target_id is None or target_id < 0 else target_id
-
-    @staticmethod
-    def _parse_player(text: str) -> Optional[int]:
-        lower = text.lower()
-        if lower.startswith('player'):
-            return NetworkBridge._parse_int(lower.replace('player', '', 1))
-        return NetworkBridge._parse_int(text)
-
-    @staticmethod
-    def _parse_int(text: str) -> Optional[int]:
-        try:
-            return int(float(text))
-        except (TypeError, ValueError):
-            return None
-
-    @staticmethod
-    def _parse_float(text: str) -> Optional[float]:
-        try:
-            return float(text)
-        except (TypeError, ValueError):
-            return None
+                prev_target = self._last_sent_targets.get(u.id)
+                if u.target_id is not None and prev_target != u.target_id:
+                    self.client.send_message(f"ATTACK|{u.id}|{u.target_id}")
+                    self._last_sent_targets[u.id] = u.target_id
 
 
 class NetworkedGeneral:
     """Wraps a local AI general and synchronizes with the network each tick."""
 
-    def __init__(self, wrapped_general, bridge: NetworkBridge):
+    def __init__(self, wrapped_general, bridge: NetworkBridgeV2):
         self.wrapped_general = wrapped_general
         self.bridge = bridge
 
@@ -236,7 +113,7 @@ class NetworkedGeneral:
 
 def configure_network_generals(
     generals: Dict[int, object],
-    bridge: NetworkBridge,
+    bridge: NetworkBridgeV2,
     local_player: int,
 ) -> Dict[int, object]:
     configured: Dict[int, object] = {}
@@ -399,10 +276,10 @@ def main():
             2: AI2_class(2)
         }
 
-        net_bridge: Optional[NetworkBridge] = None
+        net_bridge: Optional[NetworkBridgeV2] = None
         if args.net_enable:
             try:
-                net_bridge = NetworkBridge(
+                net_bridge = NetworkBridgeV2(
                     host=args.net_host,
                     port=args.net_port,
                     local_player=args.net_local_player,
