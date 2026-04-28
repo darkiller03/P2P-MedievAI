@@ -1,14 +1,251 @@
 import argparse
 from Map import MAP_W, MAP_H
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
 from Engine import SimpleEngine
-from Scenario import square_scenario, chevron_scenario, optimal_scenario, echelon_scenario
+from Scenario import square_scenario, chevron_scenario, optimal_scenario, echelon_scenario, tiny_scenario
 import random
 import curses
 import time
 from Generals import DaftGeneral, BrainDeadGeneral, New_General_1, New_General_2, New_General_3, GenghisKhanPrimeGeneral
 from Scenario_lanchester import lanchester_scenario
 from battle_plot import generate_lanchester_plot
+from p2p_client import P2PClient
+
+
+class PassiveGeneral:
+    """General used for remote-controlled players in network mode."""
+
+    def __init__(self, player: int):
+        self.player = player
+
+    def give_orders(self, engine: SimpleEngine):
+        _ = engine
+
+
+class NetworkBridge:
+    """
+    Bridges engine state and local C P2P node.
+
+    - inbound: drains async queue without blocking game loop
+    - outbound: publishes local player's unit updates
+    """
+
+    def __init__(self, host: str, port: int, local_player: int):
+        self.client = P2PClient(host=host, port=port)
+        self.local_player = local_player
+        self._last_processed_tick: Optional[float] = None
+        self._last_sent_positions: Dict[int, Tuple[float, float]] = {}
+        self._last_sent_targets: Dict[int, Optional[int]] = {}
+
+    def connect(self) -> None:
+        self.client.connect()
+        self.client.start_receiver_thread()
+        self.client.send_message(f"HELLO|python|player{self.local_player}")
+
+    def close(self) -> None:
+        self.client.close()
+
+    def integrate_network(self, engine: SimpleEngine) -> None:
+        # Engine calls generals for multiple players at same tick. Process queue once/tick.
+        if self._last_processed_tick == engine.tick:
+            return
+
+        while True:
+            raw = self.client.try_get_message()
+            if raw is None:
+                break
+            self.process_incoming_message(raw, engine)
+
+        self._last_processed_tick = engine.tick
+
+    def send_ai_action(self, msg: str) -> None:
+        self.client.send_message(msg)
+
+    def publish_local_actions(self, engine: SimpleEngine) -> None:
+        for u in engine.get_units_for_player(self.local_player):
+            # Authoritative per-unit state replication keeps both simulations aligned.
+            self.send_ai_action(
+                f"STATE|player{u.player}|{u.id}|{u.x:.3f}|{u.y:.3f}|{u.hp:.3f}|{1 if u.alive else 0}|{u.target_id if u.target_id is not None else -1}"
+            )
+
+            prev_pos = self._last_sent_positions.get(u.id)
+            current_pos = (round(u.x, 2), round(u.y, 2))
+            if prev_pos != current_pos:
+                self.send_ai_action(
+                    f"MOVE|player{u.player}|{u.id}|{current_pos[0]}|{current_pos[1]}"
+                )
+                self._last_sent_positions[u.id] = current_pos
+
+            prev_target = self._last_sent_targets.get(u.id)
+            if u.target_id is not None and prev_target != u.target_id:
+                self.send_ai_action(f"ATTACK|player{u.player}|{u.id}|{u.target_id}")
+                self._last_sent_targets[u.id] = u.target_id
+
+    def process_incoming_message(self, msg: str, engine: SimpleEngine) -> None:
+        parts = msg.strip().split('|')
+        if not parts:
+            return
+
+        kind = parts[0].upper()
+        if kind == 'HELLO':
+            return
+
+        if kind == 'MOVE':
+            self._handle_move(parts, engine)
+            return
+
+        if kind == 'ATTACK':
+            self._handle_attack(parts, engine)
+            return
+
+        if kind == 'STATE':
+            self._handle_state(parts, engine)
+            return
+
+        if kind in ('REQUEST_OWNERSHIP', 'GRANT_OWNERSHIP'):
+            # Ownership can be layered later without blocking base integration.
+            return
+
+    def move_unit(self, engine: SimpleEngine, unit_id: int, x: float, y: float) -> None:
+        unit = engine.units_by_id.get(unit_id)
+        if unit is None or not unit.alive:
+            return
+        unit.x = x
+        unit.y = y
+
+    def attack_unit(self, engine: SimpleEngine, attacker_id: int, target_id: int) -> None:
+        attacker = engine.units_by_id.get(attacker_id)
+        if attacker is None or not attacker.alive:
+            return
+
+        target = engine.units_by_id.get(target_id)
+        if target is None or not target.alive:
+            return
+
+        attacker.target_id = target.id
+
+    def _handle_move(self, parts: List[str], engine: SimpleEngine) -> None:
+        # Preferred format: MOVE|playerX|unit_id|x|y
+        if len(parts) == 5:
+            player_id = self._parse_player(parts[1])
+            if player_id is None or player_id == self.local_player:
+                return
+            unit_id = self._parse_int(parts[2])
+            x = self._parse_float(parts[3])
+            y = self._parse_float(parts[4])
+            if unit_id is None or x is None or y is None:
+                return
+            self.move_unit(engine, unit_id, x, y)
+            return
+
+        # Legacy format fallback: MOVE|playerX|x|y
+        if len(parts) == 4:
+            player_id = self._parse_player(parts[1])
+            x = self._parse_float(parts[2])
+            y = self._parse_float(parts[3])
+            if player_id is None or x is None or y is None:
+                return
+            units = engine.get_units_for_player(player_id)
+            if units:
+                self.move_unit(engine, units[0].id, x, y)
+
+    def _handle_attack(self, parts: List[str], engine: SimpleEngine) -> None:
+        # Preferred format: ATTACK|playerX|attacker_id|target_id
+        if len(parts) == 4:
+            player_id = self._parse_player(parts[1])
+            if player_id is None or player_id == self.local_player:
+                return
+            attacker_id = self._parse_int(parts[2])
+            target_id = self._parse_int(parts[3])
+            if attacker_id is None or target_id is None:
+                return
+            self.attack_unit(engine, attacker_id, target_id)
+            return
+
+        # Legacy format fallback: ATTACK|playerX|target_id
+        if len(parts) == 3:
+            player_id = self._parse_player(parts[1])
+            target_id = self._parse_int(parts[2])
+            if player_id is None or target_id is None:
+                return
+            units = engine.get_units_for_player(player_id)
+            if units:
+                self.attack_unit(engine, units[0].id, target_id)
+
+    def _handle_state(self, parts: List[str], engine: SimpleEngine) -> None:
+        # Format: STATE|playerX|unit_id|x|y|hp|alive|target_id
+        if len(parts) != 8:
+            return
+
+        player_id = self._parse_player(parts[1])
+        if player_id is None or player_id == self.local_player:
+            return
+
+        unit_id = self._parse_int(parts[2])
+        x = self._parse_float(parts[3])
+        y = self._parse_float(parts[4])
+        hp = self._parse_float(parts[5])
+        alive_flag = self._parse_int(parts[6])
+        target_id = self._parse_int(parts[7])
+
+        if unit_id is None or x is None or y is None or hp is None or alive_flag is None:
+            return
+
+        unit = engine.units_by_id.get(unit_id)
+        if unit is None:
+            return
+
+        unit.x = x
+        unit.y = y
+        unit.hp = hp
+        unit.alive = alive_flag == 1
+        unit.target_id = None if target_id is None or target_id < 0 else target_id
+
+    @staticmethod
+    def _parse_player(text: str) -> Optional[int]:
+        lower = text.lower()
+        if lower.startswith('player'):
+            return NetworkBridge._parse_int(lower.replace('player', '', 1))
+        return NetworkBridge._parse_int(text)
+
+    @staticmethod
+    def _parse_int(text: str) -> Optional[int]:
+        try:
+            return int(float(text))
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _parse_float(text: str) -> Optional[float]:
+        try:
+            return float(text)
+        except (TypeError, ValueError):
+            return None
+
+
+class NetworkedGeneral:
+    """Wraps a local AI general and synchronizes with the network each tick."""
+
+    def __init__(self, wrapped_general, bridge: NetworkBridge):
+        self.wrapped_general = wrapped_general
+        self.bridge = bridge
+
+    def give_orders(self, engine: SimpleEngine):
+        self.wrapped_general.give_orders(engine)
+
+
+def configure_network_generals(
+    generals: Dict[int, object],
+    bridge: NetworkBridge,
+    local_player: int,
+) -> Dict[int, object]:
+    configured: Dict[int, object] = {}
+    for pid, general in generals.items():
+        if pid == local_player:
+            configured[pid] = NetworkedGeneral(general, bridge)
+        else:
+            configured[pid] = PassiveGeneral(pid)
+    return configured
 
 
 def get_ai_class(ai_name: str):
@@ -38,12 +275,13 @@ def get_scenario(scenario_name: str):
         'chevron_scenario': chevron_scenario,
         'optimal_scenario': optimal_scenario,
         'echelon_scenario': echelon_scenario,
-        'lanchester_scenario': lanchester_scenario
+        'lanchester_scenario': lanchester_scenario,
+        'tiny_scenario': tiny_scenario
     }
     return scenario_map.get(scenario_name, square_scenario)
 
 
-def run_battle(engine: SimpleEngine, generals: Dict, terminal_view: bool = False, datafile: str = None):
+def run_battle(engine: SimpleEngine, generals: Dict, terminal_view: bool = False, datafile: str = None, net_bridge = None):
     """Run a single battle and optionally save results to file"""
     t = 0.0
     dt = 0.2
@@ -53,9 +291,20 @@ def run_battle(engine: SimpleEngine, generals: Dict, terminal_view: bool = False
     
     # Run the simulation
     while t < max_ticks:
+        # BEFORE step: process incoming network messages
+        if net_bridge:
+            net_bridge.integrate_network(engine)
+            print(f"[NET] Processed incoming messages at step {step}")
+        
         engine.step(dt, generals)
         t += dt
         step += 1
+        
+        # AFTER step: send local unit actions to network
+        if net_bridge:
+            net_bridge.publish_local_actions(engine)
+            print(f"[NET] Published local actions at step {step}")
+        
         p1 = engine.get_units_for_player(1)
         p2 = engine.get_units_for_player(2)
         if not p1 or not p2:
@@ -92,12 +341,16 @@ def main():
 
     # run command
     run_parser = subparsers.add_parser('run', help='Run a battle scenario')
-    run_parser.add_argument('scenario', help='Scenario to run (square_scenario, chevron_scenario, optimal_scenario, echelon_scenario)')
+    run_parser.add_argument('scenario', help='Scenario to run (tiny_scenario, square_scenario, chevron_scenario, optimal_scenario, echelon_scenario)')
     run_parser.add_argument('AI1', nargs='?', default='DaftGeneral', help='First AI (default: DaftGeneral)')
     run_parser.add_argument('AI2', nargs='?', default='BrainDeadGeneral', help='Second AI (default: BrainDeadGeneral)')
     run_parser.add_argument('-t', action='store_true', help='Terminal/headless view (default: 2.5D PyGame)')
     run_parser.add_argument('-d', type=str, help='Data file to save results')
     run_parser.add_argument('--seed', type=int, help='Random seed')
+    run_parser.add_argument('--net-enable', action='store_true', help='Enable P2P network integration for run command')
+    run_parser.add_argument('--net-host', default='127.0.0.1', help='Local C node host for Python TCP client')
+    run_parser.add_argument('--net-port', type=int, default=9001, help='Local C node port for Python TCP client')
+    run_parser.add_argument('--net-local-player', type=int, choices=[1, 2], default=1, help='Player controlled by this process in network mode')
 
     # load command
     load_parser = subparsers.add_parser('load', help='Load a saved battle')
@@ -145,6 +398,25 @@ def main():
             1: AI1_class(1),
             2: AI2_class(2)
         }
+
+        net_bridge: Optional[NetworkBridge] = None
+        if args.net_enable:
+            try:
+                net_bridge = NetworkBridge(
+                    host=args.net_host,
+                    port=args.net_port,
+                    local_player=args.net_local_player,
+                )
+                net_bridge.connect()
+                generals = configure_network_generals(generals, net_bridge, args.net_local_player)
+                print(
+                    f"[NET] enabled: local_player={args.net_local_player}, "
+                    f"node={args.net_host}:{args.net_port}"
+                )
+            except Exception as exc:
+                print(f"[NET] failed to initialize network mode: {exc}")
+                print("[NET] continuing in offline mode.")
+                net_bridge = None
         
         # If -t flag: run with terminal visualization
         if args.t:
@@ -154,7 +426,7 @@ def main():
                     print('Running with terminal map visualization...')
                     try:
                         from TerminalRenderer import TerminalRenderer
-                        renderer = TerminalRenderer(engine, generals)
+                        renderer = TerminalRenderer(engine, generals, net_bridge=net_bridge)
                         result = renderer.run()
                         
                         # Check if user pressed F9 to switch to PyGame
@@ -179,7 +451,7 @@ def main():
                     try:
                         import pygame
                         from PyGameRenderer import PygameRenderer
-                        pygame_renderer = PygameRenderer(engine, generals)
+                        pygame_renderer = PygameRenderer(engine, generals, net_bridge=net_bridge)
                         result = pygame_renderer.run()
                         
                         # Check if user pressed F9 to switch back to terminal
@@ -220,7 +492,7 @@ def main():
                     try:
                         import pygame
                         from PyGameRenderer import PygameRenderer
-                        renderer = PygameRenderer(engine, generals)
+                        renderer = PygameRenderer(engine, generals, net_bridge=net_bridge)
                         result = renderer.run()
                         
                         # Check if user pressed F9 to switch to terminal
@@ -278,6 +550,9 @@ def main():
                     for event in engine.events:
                         f.write(f'   {event}\n')
                 print(f'Battle data saved to {args.d}')
+
+                if net_bridge is not None:
+                    net_bridge.close()
 
     # Handle load command
     elif args.command == 'load':
