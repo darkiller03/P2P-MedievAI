@@ -1,4 +1,9 @@
 import argparse
+import sys
+import os
+# Add parent directories to path so we can import battle_plot from AgeOfEmpire/
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+
 from Map import MAP_W, MAP_H
 from typing import List, Dict, Optional, Tuple
 from Engine import SimpleEngine
@@ -402,6 +407,7 @@ def get_ai_class(ai_name: str):
         'New_General_3': New_General_3,
         'DAFT': DaftGeneral,  # Short alias
         'BRAINDEAD': BrainDeadGeneral,  # Short alias
+        'BrainDead': BrainDeadGeneral,  # Mixed case alias
         'Genghis' : GenghisKhanPrimeGeneral,
     }
     ai_class = ai_map.get(ai_name)
@@ -671,6 +677,26 @@ def main():
                     f.write('Events:\n')
                     for event in engine.events:
                         f.write(f'   {event}\n')
+
+                    if net_bridge is not None:
+                        f.write('\n[V1 NETWORK INCONSISTENCY REPORT]\n')
+                        inconsistency_report = net_bridge.get_inconsistency_report()
+                        f.write(f'Total inconsistencies: {inconsistency_report["total_inconsistencies"]}\n')
+                        f.write(f'  Position races: {inconsistency_report["position_races"]}\n')
+                        f.write(f'  HP races: {inconsistency_report["hp_races"]}\n')
+                        f.write(f'  Alive races: {inconsistency_report["alive_races"]}\n')
+                        f.write('\nInconsistency log:\n')
+                        for inc in inconsistency_report['log']:
+                            f.write(f'  {inc}\n')
+
+                        f.write('\n[V1 NETWORK METRICS]\n')
+                        metrics_summary = get_global_metrics().get_summary()
+                        f.write(f"Duration: {metrics_summary['duration_sec']}s\n")
+                        f.write(f"Messages sent: {metrics_summary['messages']['sent']}\n")
+                        f.write(f"Messages received: {metrics_summary['messages']['received']}\n")
+                        f.write(f"Avg latency: {metrics_summary['messages']['avg_latency_ms']:.2f}ms\n")
+                        f.write(f"Total race conditions: {metrics_summary['races']['total']}\n")
+                        f.write(f"Total state mismatches: {metrics_summary['mismatches']['total']}\n")
                 print(f'Battle data saved to {args.d}')
         else:
             # Default: show 2.5D PyGame visualization
@@ -738,6 +764,26 @@ def main():
                     f.write('Events:\n')
                     for event in engine.events:
                         f.write(f'   {event}\n')
+
+                    if net_bridge is not None:
+                        f.write('\n[V1 NETWORK INCONSISTENCY REPORT]\n')
+                        inconsistency_report = net_bridge.get_inconsistency_report()
+                        f.write(f'Total inconsistencies: {inconsistency_report["total_inconsistencies"]}\n')
+                        f.write(f'  Position races: {inconsistency_report["position_races"]}\n')
+                        f.write(f'  HP races: {inconsistency_report["hp_races"]}\n')
+                        f.write(f'  Alive races: {inconsistency_report["alive_races"]}\n')
+                        f.write('\nInconsistency log:\n')
+                        for inc in inconsistency_report['log']:
+                            f.write(f'  {inc}\n')
+
+                        f.write('\n[V1 NETWORK METRICS]\n')
+                        metrics_summary = get_global_metrics().get_summary()
+                        f.write(f"Duration: {metrics_summary['duration_sec']}s\n")
+                        f.write(f"Messages sent: {metrics_summary['messages']['sent']}\n")
+                        f.write(f"Messages received: {metrics_summary['messages']['received']}\n")
+                        f.write(f"Avg latency: {metrics_summary['messages']['avg_latency_ms']:.2f}ms\n")
+                        f.write(f"Total race conditions: {metrics_summary['races']['total']}\n")
+                        f.write(f"Total state mismatches: {metrics_summary['mismatches']['total']}\n")
                 print(f'Battle data saved to {args.d}')
 
                 if net_bridge is not None:
