@@ -1,0 +1,5 @@
+battle run square_scenario -d results.txt
+battle run square_scenario DaftGeneral BrainDeadGeneral -d custom.txt
+battle run chevron_scenario -d test.txt
+battle tourney -N 5 -d tournament.txt
+battle plot DaftGeneral PlotLanchester Lanchester Knight Crossbow range (1,100)

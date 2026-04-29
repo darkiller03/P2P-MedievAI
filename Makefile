@@ -1,13 +1,22 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2
-TARGET = tcp_relay_server
-SRCS = tcp_relay_server.c utils.c connection.c server.c
+CFLAGS = -Wall -Wextra -O2 -D_POSIX_C_SOURCE=200809L
+TARGET = p2p_node
+SRCS = main.c utils.c connection.c server.c
+OBJS = $(SRCS:.c=.o)
 HEADERS = tcp_relay_server.h utils.h connection.h server.h
 
-$(TARGET): $(SRCS) $(HEADERS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
+.PHONY: all clean
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS) $(HEADERS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(OBJS) *.o
 
-.PHONY: clean
+# For development: compile without message_protocol/conflict_resolution for now
+# These can be added later when their dependencies are resolved

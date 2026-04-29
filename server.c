@@ -35,7 +35,7 @@ int init_server(unsigned short listen_port) {
     return listen_sock;
 }
 
-bool accept_new_connection(int listen_sock, ConnectionList *list) {
+bool accept_new_connection(int listen_sock, ConnectionList *list, bool is_local_client) {
     struct sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
     int incoming = accept(listen_sock, (struct sockaddr *)&addr, &addr_len);
@@ -47,7 +47,7 @@ bool accept_new_connection(int listen_sock, ConnectionList *list) {
     char label[64];
     snprintf(label, sizeof(label), "%s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-    if (!append_connection(list, incoming, label)) {
+    if (!append_connection(list, incoming, label, is_local_client)) {
         printf("[ERROR] cannot track new connection %s\n", label);
         close(incoming);
         return false;
@@ -84,7 +84,7 @@ bool connect_to_peer(ConnectionList *list, const char *ip, unsigned short port) 
     char label[64];
     snprintf(label, sizeof(label), "%s:%u", ip, port);
 
-    if (!append_connection(list, sock, label)) {
+    if (!append_connection(list, sock, label, false)) {
         printf("[ERROR] cannot track outbound peer %s\n", label);
         close(sock);
         return false;
@@ -94,34 +94,52 @@ bool connect_to_peer(ConnectionList *list, const char *ip, unsigned short port) 
     return true;
 }
 
-void run_event_loop(int listen_sock, ConnectionList *connections) {
+void run_event_loop(int peer_listen_sock, int ipc_listen_sock, ConnectionList *peer_connections, ConnectionList *ipc_connections, unsigned short node_port) {
     printf("[INFO] P2P node started.\n");
     printf("[INFO] newline-delimited protocol examples:\n");
     printf("[INFO]   MOVE|player1|10|5\n");
     printf("[INFO]   ATTACK|player1|enemy2\n");
+    printf("[INFO] local Python client connects on IPC port separately from peer network.\n");
 
     while (1) {
         fd_set read_set;
         FD_ZERO(&read_set);
-        FD_SET(listen_sock, &read_set);
+        FD_SET(peer_listen_sock, &read_set);
+        FD_SET(ipc_listen_sock, &read_set);
 
-        for (size_t i = 0; i < connections->count; i++) {
-            FD_SET(connections->items[i].socket, &read_set);
+        int max_fd = peer_listen_sock > ipc_listen_sock ? peer_listen_sock : ipc_listen_sock;
+
+        for (size_t i = 0; i < peer_connections->count; i++) {
+            FD_SET(peer_connections->items[i].socket, &read_set);
+            if (peer_connections->items[i].socket > max_fd) {
+                max_fd = peer_connections->items[i].socket;
+            }
         }
 
-        int ready = select(FD_SETSIZE, &read_set, NULL, NULL, NULL);
+        for (size_t i = 0; i < ipc_connections->count; i++) {
+            FD_SET(ipc_connections->items[i].socket, &read_set);
+            if (ipc_connections->items[i].socket > max_fd) {
+                max_fd = ipc_connections->items[i].socket;
+            }
+        }
+
+        int ready = select(max_fd + 1, &read_set, NULL, NULL, NULL);
         if (ready == -1) {
             printf("[ERROR] select failed: %d\n", errno);
             break;
         }
 
-        if (FD_ISSET(listen_sock, &read_set)) {
-            accept_new_connection(listen_sock, connections);
+        if (FD_ISSET(peer_listen_sock, &read_set)) {
+            accept_new_connection(peer_listen_sock, peer_connections, false);
+        }
+
+        if (FD_ISSET(ipc_listen_sock, &read_set)) {
+            accept_new_connection(ipc_listen_sock, ipc_connections, true);
         }
 
         size_t i = 0;
-        while (i < connections->count) {
-            Connection *c = &connections->items[i];
+        while (i < peer_connections->count) {
+            Connection *c = &peer_connections->items[i];
             if (!FD_ISSET(c->socket, &read_set)) {
                 i++;
                 continue;
@@ -131,18 +149,48 @@ void run_event_loop(int listen_sock, ConnectionList *connections) {
             int n = recv(c->socket, recv_buf, sizeof(recv_buf), 0);
 
             if (n == 0) {
-                remove_connection(connections, i);
+                remove_connection(peer_connections, i);
                 continue;
             }
 
             if (n == -1) {
                 printf("[WARN] recv error from %s (err=%d)\n", c->label, errno);
-                remove_connection(connections, i);
+                remove_connection(peer_connections, i);
                 continue;
             }
 
-            if (!handle_incoming_data(connections, i, recv_buf, n)) {
-                remove_connection(connections, i);
+            if (!handle_peer_incoming_data(peer_connections, ipc_connections, i, recv_buf, n)) {
+                remove_connection(peer_connections, i);
+                continue;
+            }
+
+            i++;
+        }
+
+        i = 0;
+        while (i < ipc_connections->count) {
+            Connection *c = &ipc_connections->items[i];
+            if (!FD_ISSET(c->socket, &read_set)) {
+                i++;
+                continue;
+            }
+
+            char recv_buf[RECV_CHUNK];
+            int n = recv(c->socket, recv_buf, sizeof(recv_buf), 0);
+
+            if (n == 0) {
+                remove_connection(ipc_connections, i);
+                continue;
+            }
+
+            if (n == -1) {
+                printf("[WARN] recv error from %s (err=%d)\n", c->label, errno);
+                remove_connection(ipc_connections, i);
+                continue;
+            }
+
+            if (!handle_ipc_incoming_data(peer_connections, ipc_connections, i, recv_buf, n)) {
+                remove_connection(ipc_connections, i);
                 continue;
             }
 

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Report - Tick 100.73</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .summary {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .summary-item {
+            display: inline-block;
+            margin: 10px 20px 10px 0;
+            font-size: 16px;
+        }
+        .summary-item strong {
+            color: #4CAF50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .player1 {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .player2 {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        .hp-bar {
+            display: inline-block;
+            width: 100px;
+            height: 15px;
+            background: #ddd;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            transition: width 0.3s;
+        }
+        .status-alive {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .status-dead {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .events {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .event {
+            padding: 5px;
+            border-left: 3px solid #4CAF50;
+            margin: 5px 0;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 MedievAIl Debug Report</h1>
+    
+    <div class="summary">
+        <div class="summary-item"><strong>Tick:</strong> 100.73</div>
+        <div class="summary-item"><strong>Total Units:</strong> 1</div>
+        <div class="summary-item"><strong>Player 1 Units:</strong> 0</div>
+        <div class="summary-item"><strong>Player 2 Units:</strong> 1</div>
+        <div class="summary-item"><strong>Generated:</strong> 2026-01-12 15:43:26</div>
+    </div>
+    
+    <h2>🎯 AI Generals</h2>
+    <table>
+        <tr>
+            <th>Player</th>
+            <th>AI Type</th>
+            <th>Units Count</th>
+            <th>Strategy</th>
+        </tr>
+
+        <tr>
+            <td class="player1">Player 1</td>
+            <td>New_General_1</td>
+            <td>0</td>
+            <td>Unknown strategy</td>
+        </tr>
+
+        <tr>
+            <td class="player2">Player 2</td>
+            <td>DaftGeneral</td>
+            <td>1</td>
+            <td>Always targets nearest enemy regardless of distance</td>
+        </tr>
+
+    </table>
+    
+    <h2>⚔️ All Units</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Player</th>
+            <th>Type</th>
+            <th>Position</th>
+            <th>HP</th>
+            <th>Attack</th>
+            <th>Range</th>
+            <th>Speed</th>
+            <th>Target</th>
+            <th>Status</th>
+        </tr>
+
+        <tr>
+            <td>146</td>
+            <td class="player2">P2</td>
+            <td>knight</td>
+            <td>(64.5, 61.0)</td>
+            <td>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: 55.00000000000001%"></div>
+                </div>
+                55.0 / 100.0
+            </td>
+            <td>10.0</td>
+            <td>1.0</td>
+            <td>1.4</td>
+            <td>Unit #80</td>
+            <td class="status-alive">Alive</td>
+        </tr>
+
+    </table>
+    
+    <h2>📜 Recent Events</h2>
+    <div class="events">
+        <div class="event">Unit 80 (P1) died at tick 100.73</div>
+        <div class="event">Unit 90 (P1) died at tick 98.82</div>
+        <div class="event">Unit 95 (P2) died at tick 96.34</div>
+        <div class="event">Unit 65 (P1) died at tick 93.28</div>
+        <div class="event">Unit 89 (P1) died at tick 93.13</div>
+        <div class="event">Unit 123 (P2) died at tick 91.83</div>
+        <div class="event">Unit 67 (P1) died at tick 90.25</div>
+        <div class="event">Unit 77 (P1) died at tick 87.25</div>
+        <div class="event">Unit 88 (P1) died at tick 84.96</div>
+        <div class="event">Unit 148 (P2) died at tick 82.46</div>
+        <div class="event">Unit 93 (P2) died at tick 81.46</div>
+        <div class="event">Unit 86 (P1) died at tick 80.96</div>
+        <div class="event">Unit 101 (P2) died at tick 77.46</div>
+        <div class="event">Unit 87 (P1) died at tick 76.96</div>
+        <div class="event">Unit 108 (P2) died at tick 74.96</div>
+        <div class="event">Unit 116 (P2) died at tick 72.96</div>
+        <div class="event">Unit 76 (P1) died at tick 72.80</div>
+        <div class="event">Unit 120 (P2) died at tick 71.37</div>
+        <div class="event">Unit 111 (P2) died at tick 70.87</div>
+        <div class="event">Unit 85 (P1) died at tick 68.87</div>
+        <div class="event">Unit 84 (P1) died at tick 68.87</div>
+        <div class="event">Unit 118 (P2) died at tick 66.87</div>
+        <div class="event">Unit 78 (P1) died at tick 65.87</div>
+        <div class="event">Unit 83 (P1) died at tick 65.37</div>
+        <div class="event">Unit 75 (P1) died at tick 64.37</div>
+        <div class="event">Unit 113 (P2) died at tick 64.37</div>
+        <div class="event">Unit 82 (P1) died at tick 62.87</div>
+        <div class="event">Unit 103 (P2) died at tick 62.87</div>
+        <div class="event">Unit 110 (P2) died at tick 61.37</div>
+        <div class="event">Unit 98 (P2) died at tick 60.87</div>
+        <div class="event">Unit 73 (P1) died at tick 59.79</div>
+        <div class="event">Unit 96 (P2) died at tick 58.79</div>
+        <div class="event">Unit 119 (P2) died at tick 58.79</div>
+        <div class="event">Unit 112 (P2) died at tick 58.29</div>
+        <div class="event">Unit 115 (P2) died at tick 57.79</div>
+        <div class="event">Unit 69 (P1) died at tick 57.29</div>
+        <div class="event">Unit 81 (P1) died at tick 56.79</div>
+        <div class="event">Unit 121 (P2) died at tick 56.79</div>
+        <div class="event">Unit 74 (P1) died at tick 55.79</div>
+        <div class="event">Unit 100 (P2) died at tick 55.29</div>
+        <div class="event">Unit 72 (P1) died at tick 54.29</div>
+        <div class="event">Unit 79 (P1) died at tick 53.79</div>
+        <div class="event">Unit 63 (P1) died at tick 52.79</div>
+        <div class="event">Unit 71 (P1) died at tick 52.29</div>
+        <div class="event">Unit 99 (P2) died at tick 51.29</div>
+        <div class="event">Unit 61 (P1) died at tick 50.79</div>
+        <div class="event">Unit 122 (P2) died at tick 50.79</div>
+        <div class="event">Unit 104 (P2) died at tick 50.29</div>
+        <div class="event">Unit 91 (P2) died at tick 49.79</div>
+        <div class="event">Unit 92 (P2) died at tick 48.79</div>
+
+    </div>
+    
+</body>
+</html>

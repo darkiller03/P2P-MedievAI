@@ -1,0 +1,17 @@
+battle run square_scenario -d results.txt
+
+battle run square_scenario DaftGeneral BrainDeadGeneral 
+
+battle load quicksave.pkl
+
+battle run chevron_scenario Genghis BrainDeadGeneral 
+
+battle run optimal_scenario New_General_3 BRAINDEAD
+
+battle run echelon_scenario Genghis DaftGeneral
+
+battle tourney -N 5 -d tournament.txt
+
+battle tourney -G DaftGeneral BrainDeadGeneral -S square_scenario chevron_scenario -N 10 -na
+
+battle plot DaftGeneral PlotLanchester Lanchester Knight Crossbow range (1,100)

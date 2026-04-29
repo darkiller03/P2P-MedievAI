@@ -1,4 +1,6 @@
 import argparse
+import os
+import sys
 from Map import MAP_W, MAP_H
 from typing import List, Dict, Optional, Tuple
 from Engine import SimpleEngine
@@ -8,6 +10,12 @@ import curses
 import time
 from Generals import DaftGeneral, BrainDeadGeneral, New_General_1, New_General_2, New_General_3, GenghisKhanPrimeGeneral
 from Scenario_lanchester import lanchester_scenario
+
+# Ensure repo root is on sys.path so root-level modules like battle_plot can be imported
+repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
+
 from battle_plot import generate_lanchester_plot
 from p2p_client import P2PClient
 from network_integration import NetworkIntegrator, OwnershipTracker
