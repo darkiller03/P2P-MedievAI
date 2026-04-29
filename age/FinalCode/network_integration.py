@@ -30,7 +30,8 @@ class OwnershipState:
         return owner is None or owner == self.local_player
 
     def request_ownership(self, entity_id: str, client: P2PClient) -> None:
-        client.send_message(f"REQUEST_OWNERSHIP|{entity_id}")
+        # Include requester identity in the request so peers know who asks
+        client.send_message(f"REQUEST_OWNERSHIP|{self.local_player}|{entity_id}")
 
     def grant_ownership(self, entity_id: str, owner_player: str, client: Optional[P2PClient] = None) -> None:
         self.entity_owner[entity_id] = owner_player
@@ -39,8 +40,9 @@ class OwnershipState:
         else:
             self.owned_entities.discard(entity_id)
 
+        # Broadcast grant including the new owner's identity
         if client is not None:
-            client.send_message(f"GRANT_OWNERSHIP|{entity_id}")
+            client.send_message(f"GRANT_OWNERSHIP|{owner_player}|{entity_id}")
 
 
 @dataclass
@@ -81,6 +83,7 @@ class NetworkIntegrator:
             move_unit_fn=self.move_unit_fn,
             attack_unit_fn=self.attack_unit_fn,
             ownership=self.ownership,
+            client=self.client,
         )
 
     def integrate_network(self) -> None:
@@ -109,11 +112,13 @@ def _action_to_protocol(action: Action) -> Optional[str]:
 
     if action_type == "REQUEST_OWNERSHIP":
         entity_id = str(action["entity_id"])
-        return f"REQUEST_OWNERSHIP|{entity_id}"
+        player = str(action.get("player", ""))
+        return f"REQUEST_OWNERSHIP|{player}|{entity_id}"
 
     if action_type == "GRANT_OWNERSHIP":
         entity_id = str(action["entity_id"])
-        return f"GRANT_OWNERSHIP|{entity_id}"
+        player = str(action.get("player", ""))
+        return f"GRANT_OWNERSHIP|{player}|{entity_id}"
 
     return None
 
@@ -124,6 +129,7 @@ def process_incoming_message(
     move_unit_fn: MoveUnitFn,
     attack_unit_fn: AttackUnitFn,
     ownership: Optional[OwnershipState] = None,
+    client: Optional[P2PClient] = None,
 ) -> None:
     """
     Standalone parser+applier for one protocol message.
@@ -155,16 +161,21 @@ def process_incoming_message(
     if ownership is None:
         return
 
-    if msg_type == "REQUEST_OWNERSHIP" and len(parts) == 2:
-        entity_id = parts[1]
-        # Week 2 policy hook: for now, first writer keeps ownership by default.
-        if entity_id not in ownership.entity_owner:
-            ownership.grant_ownership(entity_id, ownership.local_player)
+    # REQUEST_OWNERSHIP|requester|entity_id
+    if msg_type == "REQUEST_OWNERSHIP" and len(parts) == 3:
+        requester = parts[1]
+        entity_id = parts[2]
+        # Simple policy: if no owner exists or this node currently owns it, grant to requester
+        current_owner = ownership.entity_owner.get(entity_id)
+        if current_owner is None or current_owner == ownership.local_player:
+            ownership.grant_ownership(entity_id, requester, client)
         return
 
-    if msg_type == "GRANT_OWNERSHIP" and len(parts) == 2:
-        entity_id = parts[1]
-        ownership.grant_ownership(entity_id, ownership.local_player)
+    # GRANT_OWNERSHIP|owner|entity_id
+    if msg_type == "GRANT_OWNERSHIP" and len(parts) == 3:
+        owner_player = parts[1]
+        entity_id = parts[2]
+        ownership.grant_ownership(entity_id, owner_player)
 
 
 def integrate_network(game_state: Any, client: P2PClient, integrator: NetworkIntegrator) -> None:

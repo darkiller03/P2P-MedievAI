@@ -16,6 +16,7 @@ from Scenario_lanchester import lanchester_scenario
 from battle_plot import generate_lanchester_plot
 from p2p_client import P2PClient
 from NetworkMetrics import get_global_metrics, reset_metrics
+from network_integration import OwnershipState
 
 
 class PassiveGeneral:
@@ -42,6 +43,8 @@ class NetworkBridge:
     def __init__(self, host: str, port: int, local_player: int):
         self.client = P2PClient(host=host, port=port)
         self.local_player = local_player
+        # Ownership helper (V2): entity ids are strings
+        self.ownership = OwnershipState(local_player=f"player{self.local_player}")
         self._last_processed_tick: Optional[float] = None
         self._last_sent_positions: Dict[int, Tuple[float, float]] = {}
         self._last_sent_targets: Dict[int, Optional[int]] = {}
@@ -76,6 +79,8 @@ class NetworkBridge:
             raw = self.client.try_get_message()
             if raw is None:
                 break
+            # V1: Count inbound messages when they are pulled from the queue.
+            get_global_metrics().record_message_received(0.0)
             self.process_incoming_message(raw, engine)
 
         self._last_processed_tick = engine.tick
@@ -87,22 +92,40 @@ class NetworkBridge:
 
     def publish_local_actions(self, engine: SimpleEngine) -> None:
         for u in engine.get_units_for_player(self.local_player):
+            # Ensure local units are recorded as owned by this player
+            entity_id = str(u.id)
+            if entity_id not in self.ownership.entity_owner:
+                self.ownership.entity_owner[entity_id] = f"player{self.local_player}"
+                self.ownership.owned_entities.add(entity_id)
             # Authoritative per-unit state replication keeps both simulations aligned.
-            self.send_ai_action(
-                f"STATE|player{u.player}|{u.id}|{u.x:.3f}|{u.y:.3f}|{u.hp:.3f}|{1 if u.alive else 0}|{u.target_id if u.target_id is not None else -1}"
-            )
+            entity_id = str(u.id)
+            if not self.ownership.can_modify(entity_id):
+                # Ask for ownership before publishing state for this unit
+                self.ownership.request_ownership(entity_id, self.client)
+            else:
+                self.send_ai_action(
+                    f"STATE|player{u.player}|{u.id}|{u.x:.3f}|{u.y:.3f}|{u.hp:.3f}|{1 if u.alive else 0}|{u.target_id if u.target_id is not None else -1}"
+                )
 
             prev_pos = self._last_sent_positions.get(u.id)
             current_pos = (round(u.x, 2), round(u.y, 2))
             if prev_pos != current_pos:
-                self.send_ai_action(
-                    f"MOVE|player{u.player}|{u.id}|{current_pos[0]}|{current_pos[1]}"
-                )
+                entity_id = str(u.id)
+                if not self.ownership.can_modify(entity_id):
+                    self.ownership.request_ownership(entity_id, self.client)
+                else:
+                    self.send_ai_action(
+                        f"MOVE|player{u.player}|{u.id}|{current_pos[0]}|{current_pos[1]}"
+                    )
                 self._last_sent_positions[u.id] = current_pos
 
             prev_target = self._last_sent_targets.get(u.id)
             if u.target_id is not None and prev_target != u.target_id:
-                self.send_ai_action(f"ATTACK|player{u.player}|{u.id}|{u.target_id}")
+                entity_id = str(u.id)
+                if not self.ownership.can_modify(entity_id):
+                    self.ownership.request_ownership(entity_id, self.client)
+                else:
+                    self.send_ai_action(f"ATTACK|player{u.player}|{u.id}|{u.target_id}")
                 self._last_sent_targets[u.id] = u.target_id
 
     def process_incoming_message(self, msg: str, engine: SimpleEngine) -> None:
@@ -137,7 +160,21 @@ class NetworkBridge:
             return
 
         if kind in ('REQUEST_OWNERSHIP', 'GRANT_OWNERSHIP'):
-            # Ownership can be layered later without blocking base integration.
+            # Handle ownership protocol: formats are REQUEST_OWNERSHIP|requester|entity_id
+            # and GRANT_OWNERSHIP|owner|entity_id
+            if len(parts) == 3:
+                who = parts[1]
+                entity = parts[2]
+                if kind == 'REQUEST_OWNERSHIP':
+                    # If we currently own it or there's no owner, grant to requester
+                    current = self.ownership.entity_owner.get(entity)
+                    if current is None or current == f"player{self.local_player}":
+                        self.ownership.grant_ownership(entity, who, self.client)
+                    return
+                if kind == 'GRANT_OWNERSHIP':
+                    # Update local ownership table
+                    self.ownership.grant_ownership(entity, who)
+                    return
             return
 
     def move_unit(self, engine: SimpleEngine, unit_id: int, x: float, y: float) -> None:
@@ -325,6 +362,16 @@ class NetworkBridge:
             engine.units_by_id[unit_id] = unit
             if self.enable_debug_logging:
                 print(f"[NET] Created unit {unit_id} for player{player_id} from initial sync")
+
+        # Record ownership according to snapshot player
+        try:
+            self.ownership.entity_owner[str(unit_id)] = f"player{player_id}"
+            if f"player{player_id}" == f"player{self.local_player}":
+                self.ownership.owned_entities.add(str(unit_id))
+            else:
+                self.ownership.owned_entities.discard(str(unit_id))
+        except Exception:
+            pass
         
         # Record remote state
         self._remote_unit_states[unit_id] = {
@@ -380,7 +427,30 @@ class NetworkedGeneral:
         self.bridge = bridge
 
     def give_orders(self, engine: SimpleEngine):
-        self.wrapped_general.give_orders(engine)
+        # Provide a proxy engine to the wrapped general so local AI only sees units it currently owns.
+        class EngineProxy:
+            def __init__(self, real_engine, bridge, player):
+                self._real = real_engine
+                self._bridge = bridge
+                self._player = player
+
+            def get_units_for_player(self, player: int):
+                base = self._real.get_units_for_player(player)
+                # If the general is the local player, filter units by current ownership
+                if player == self._player:
+                    owned = []
+                    for u in base:
+                        owner = self._bridge.ownership.entity_owner.get(str(u.id), f"player{u.player}")
+                        if owner == f"player{self._player}":
+                            owned.append(u)
+                    return owned
+                return base
+
+            def __getattr__(self, name):
+                return getattr(self._real, name)
+
+        proxy = EngineProxY = EngineProxy(engine, self.bridge, self.wrapped_general.player)
+        self.wrapped_general.give_orders(proxy)
 
 
 def configure_network_generals(

@@ -1,0 +1,43 @@
+Battle data from pygame view
+Engine ticks: 43.66
+Winner: PLAYER 1 (RED)
+Events:
+   Unit 3 (P2) died at tick 26.62
+   Unit 1 (P1) died at tick 37.43
+   Unit 4 (P2) died at tick 43.66
+
+[V1 NETWORK INCONSISTENCY REPORT]
+Total inconsistencies: 30
+  Position races: 0
+  HP races: 30
+  Alive races: 0
+
+Inconsistency log:
+  HP_RACE: unit_3 local_hp=14.0 vs remote_hp=18.0
+  HP_RACE: unit_3 local_hp=13.0 vs remote_hp=18.0
+  HP_RACE: unit_3 local_hp=18.0 vs remote_hp=14.0
+  HP_RACE: unit_3 local_hp=14.0 vs remote_hp=9.0
+  HP_RACE: unit_3 local_hp=5.0 vs remote_hp=9.0
+  HP_RACE: unit_3 local_hp=4.0 vs remote_hp=9.0
+  HP_RACE: unit_3 local_hp=4.0 vs remote_hp=9.0
+  HP_RACE: unit_3 local_hp=5.0 vs remote_hp=4.0
+  HP_RACE: unit_4 local_hp=30.0 vs remote_hp=35.0
+  HP_RACE: unit_4 local_hp=35.0 vs remote_hp=30.0
+  HP_RACE: unit_4 local_hp=21.0 vs remote_hp=26.0
+  HP_RACE: unit_4 local_hp=21.0 vs remote_hp=26.0
+  HP_RACE: unit_4 local_hp=22.0 vs remote_hp=21.0
+  HP_RACE: unit_4 local_hp=16.0 vs remote_hp=21.0
+  HP_RACE: unit_4 local_hp=12.0 vs remote_hp=17.0
+  HP_RACE: unit_4 local_hp=17.0 vs remote_hp=12.0
+  HP_RACE: unit_4 local_hp=7.0 vs remote_hp=12.0
+  HP_RACE: unit_4 local_hp=12.0 vs remote_hp=7.0
+  HP_RACE: unit_4 local_hp=2.0 vs remote_hp=7.0
+  HP_RACE: unit_4 local_hp=7.0 vs remote_hp=2.0
+
+[V1 NETWORK METRICS]
+Duration: 57.89s
+Messages sent: 1002
+Messages received: 0
+Avg latency: 0.00ms
+Total race conditions: 30
+Total state mismatches: 30
