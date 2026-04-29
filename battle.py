@@ -23,9 +23,12 @@ if os.path.exists(finalcode_dir):
 else:
     sys.path.insert(0, script_dir)
 
-# Windows : _curses n'est pas fourni par CPython. On injecte un stub minimal
-# pour que l'import dans Main.py ne plante pas. Le TerminalRenderer ne sera
-# pas utilisable, mais le mode PyGame (battle) et le mode chat fonctionnent.
+# Windows : _curses n'est pas fourni par CPython. windows-curses l'enregistre
+# mais doit être importé avant curses. Si absent, on injecte un stub minimal.
+try:
+    import windows_curses  # noqa: F401  — enregistre _curses sur Windows
+except ModuleNotFoundError:
+    pass
 try:
     import curses  # noqa: F401
 except ModuleNotFoundError:
