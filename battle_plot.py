@@ -10,7 +10,7 @@ def run_simulation(unit_type, N):
     dt = 0.2
     max_ticks = 300.0
     while engine.tick < max_ticks:
-        engine.step(dt, generals)
+        engine.step(dt, generals, None)
         if not engine.get_units_for_player(1) or not engine.get_units_for_player(2):
             break
     return len(engine.get_units_for_player(2))

@@ -23,13 +23,20 @@ class SimpleEngine:
         self.units_by_id[u.id] = u
         return u
 
-    def step(self, dt: float, generals: Dict[int, "General"]):
+    def step(self, dt: float, generals: Dict[int, "General"], ownership=None):
         self.tick += dt
         for pid, gen in generals.items():
             gen.give_orders(self)
         for u in list(self.units):
             if u.alive:
-                u.step(dt, self)
+                # If ownership provided, only simulate units owned by this local player.
+                try:
+                    entity_id = str(u.id)
+                    if ownership is None or ownership.can_modify(entity_id):
+                        u.step(dt, self)
+                except Exception:
+                    # Fallback: simulate if any error checking ownership
+                    u.step(dt, self)
         self.units = [u for u in self.units if u.alive]
         self.units_by_id = {u.id: u for u in self.units}
     def mark_dead(self, unit: Unit):

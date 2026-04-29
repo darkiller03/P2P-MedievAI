@@ -14,7 +14,7 @@ def parse_args():
 def run_headless(engine: SimpleEngine, generals: Dict[int, General], max_ticks=60.0):
     t=0.0; dt=0.2; step=0; start=time.time()
     while t<max_ticks:
-        engine.step(dt, generals)
+        engine.step(dt, generals, None)
         t+=dt; step+=1
         p1 = engine.get_units_for_player(1)
         p2 = engine.get_units_for_player(2)

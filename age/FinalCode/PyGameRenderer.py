@@ -517,8 +517,8 @@ class PygameRenderer:
                 # Network: process incoming messages BEFORE step
                 if self.net_bridge:
                     self.net_bridge.integrate_network(self.engine)
-                
-                self.engine.step(sim_dt, self.generals)
+
+                self.engine.step(sim_dt, self.generals, self.net_bridge.ownership if self.net_bridge else None)
                 
                 # Network: send local actions AFTER step
                 if self.net_bridge:

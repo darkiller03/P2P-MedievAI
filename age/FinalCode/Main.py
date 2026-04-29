@@ -517,7 +517,7 @@ def run_battle(engine: SimpleEngine, generals: Dict, terminal_view: bool = False
             # Suppress verbose logging for cleaner output
             # print(f"[NET] Processed incoming messages at step {step}")
         
-        engine.step(dt, generals)
+        engine.step(dt, generals, net_bridge.ownership if net_bridge else None)
         t += dt
         step += 1
         
@@ -1098,7 +1098,7 @@ def main():
                         generals = {1: AI_class(1), 2: AI_class(2)}
                         
                         while t < max_ticks:
-                            engine.step(dt, generals)
+                            engine.step(dt, generals, net_bridge.ownership if net_bridge else None)
                             t += dt
                             p1 = engine.get_units_for_player(1)
                             p2 = engine.get_units_for_player(2)

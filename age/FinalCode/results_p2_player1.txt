@@ -1,0 +1,159 @@
+Battle data from pygame view
+Engine ticks: 61.67
+Winner: PLAYER 1 (RED)
+Events:
+   Unit 103 (P2) died at tick 15.67
+   Unit 104 (P2) died at tick 15.67
+   Unit 105 (P2) died at tick 16.06
+   Unit 102 (P2) died at tick 16.54
+   Unit 2 (P1) died at tick 16.73
+   Unit 107 (P2) died at tick 17.01
+   Unit 108 (P2) died at tick 17.39
+   Unit 109 (P2) died at tick 17.58
+   Unit 1 (P1) died at tick 17.58
+   Unit 110 (P2) died at tick 17.96
+   Unit 114 (P2) died at tick 17.96
+   Unit 113 (P2) died at tick 18.05
+   Unit 112 (P2) died at tick 18.45
+   Unit 127 (P2) died at tick 18.54
+   Unit 101 (P2) died at tick 19.47
+   Unit 138 (P2) died at tick 19.47
+   Unit 106 (P2) died at tick 19.57
+   Unit 133 (P2) died at tick 19.76
+   Unit 21 (P1) died at tick 19.85
+   Unit 41 (P1) died at tick 19.94
+   Unit 142 (P2) died at tick 20.49
+   Unit 32 (P1) died at tick 20.59
+   Unit 118 (P2) died at tick 20.88
+   Unit 119 (P2) died at tick 21.32
+   Unit 115 (P2) died at tick 21.32
+   Unit 8 (P1) died at tick 21.32
+   Unit 117 (P2) died at tick 21.62
+   Unit 124 (P2) died at tick 22.11
+   Unit 120 (P2) died at tick 22.40
+   Unit 17 (P1) died at tick 22.87
+   Unit 147 (P2) died at tick 22.98
+   Unit 37 (P1) died at tick 23.27
+   Unit 135 (P2) died at tick 23.37
+   Unit 143 (P2) died at tick 23.37
+   Unit 123 (P2) died at tick 23.47
+   Unit 46 (P1) died at tick 24.15
+   Unit 128 (P2) died at tick 24.24
+   Unit 148 (P2) died at tick 24.81
+   Unit 152 (P2) died at tick 24.99
+   Unit 38 (P1) died at tick 24.99
+   Unit 116 (P2) died at tick 25.36
+   Unit 153 (P2) died at tick 25.73
+   Unit 125 (P2) died at tick 25.82
+   Unit 36 (P1) died at tick 26.94
+   Unit 22 (P1) died at tick 27.03
+   Unit 149 (P2) died at tick 27.31
+   Unit 50 (P1) died at tick 27.41
+   Unit 132 (P2) died at tick 27.95
+   Unit 129 (P2) died at tick 28.23
+   Unit 139 (P2) died at tick 28.23
+   Unit 144 (P2) died at tick 28.50
+   Unit 154 (P2) died at tick 29.52
+   Unit 158 (P2) died at tick 30.13
+   Unit 140 (P2) died at tick 30.22
+   Unit 157 (P2) died at tick 31.05
+   Unit 56 (P1) died at tick 31.32
+   Unit 150 (P2) died at tick 31.50
+   Unit 151 (P2) died at tick 31.69
+   Unit 141 (P2) died at tick 31.97
+   Unit 31 (P1) died at tick 32.34
+   Unit 126 (P2) died at tick 32.88
+   Unit 134 (P2) died at tick 33.16
+   Unit 160 (P2) died at tick 33.94
+   Unit 111 (P2) died at tick 33.94
+   Unit 130 (P2) died at tick 34.93
+   Unit 159 (P2) died at tick 35.02
+   Unit 18 (P1) died at tick 35.20
+   Unit 168 (P2) died at tick 36.38
+   Unit 34 (P1) died at tick 36.77
+   Unit 136 (P2) died at tick 37.12
+   Unit 131 (P2) died at tick 37.64
+   Unit 28 (P1) died at tick 38.10
+   Unit 121 (P2) died at tick 38.54
+   Unit 188 (P2) died at tick 38.88
+   Unit 145 (P2) died at tick 39.79
+   Unit 122 (P2) died at tick 39.79
+   Unit 155 (P2) died at tick 39.88
+   Unit 178 (P2) died at tick 40.33
+   Unit 137 (P2) died at tick 40.42
+   Unit 146 (P2) died at tick 40.51
+   Unit 169 (P2) died at tick 40.77
+   Unit 179 (P2) died at tick 41.99
+   Unit 156 (P2) died at tick 42.51
+   Unit 170 (P2) died at tick 43.95
+   Unit 162 (P2) died at tick 44.22
+   Unit 167 (P2) died at tick 44.31
+   Unit 177 (P2) died at tick 44.39
+   Unit 190 (P2) died at tick 44.91
+   Unit 172 (P2) died at tick 45.70
+   Unit 189 (P2) died at tick 45.87
+   Unit 42 (P1) died at tick 45.87
+   Unit 180 (P2) died at tick 45.96
+   Unit 163 (P2) died at tick 46.33
+   Unit 171 (P2) died at tick 46.86
+   Unit 165 (P2) died at tick 47.81
+   Unit 166 (P2) died at tick 47.99
+   Unit 161 (P2) died at tick 48.60
+   Unit 176 (P2) died at tick 49.04
+   Unit 173 (P2) died at tick 49.30
+   Unit 164 (P2) died at tick 50.09
+   Unit 200 (P2) died at tick 50.61
+   Unit 181 (P2) died at tick 50.61
+   Unit 186 (P2) died at tick 51.97
+   Unit 183 (P2) died at tick 51.97
+   Unit 187 (P2) died at tick 51.97
+   Unit 199 (P2) died at tick 52.57
+   Unit 174 (P2) died at tick 52.91
+   Unit 182 (P2) died at tick 53.36
+   Unit 175 (P2) died at tick 53.53
+   Unit 184 (P2) died at tick 54.72
+   Unit 185 (P2) died at tick 55.42
+   Unit 198 (P2) died at tick 56.21
+   Unit 197 (P2) died at tick 56.98
+   Unit 196 (P2) died at tick 57.85
+   Unit 195 (P2) died at tick 58.89
+   Unit 194 (P2) died at tick 59.65
+   Unit 191 (P2) died at tick 59.90
+   Unit 192 (P2) died at tick 60.49
+   Unit 193 (P2) died at tick 61.67
+
+[V1 NETWORK INCONSISTENCY REPORT]
+Total inconsistencies: 1463
+  Position races: 0
+  HP races: 1463
+  Alive races: 0
+
+Inconsistency log:
+  HP_RACE: unit_194 local_hp=7.9 vs remote_hp=15.9
+  HP_RACE: unit_191 local_hp=6.7 vs remote_hp=9.2
+  HP_RACE: unit_194 local_hp=13.6 vs remote_hp=18.6
+  HP_RACE: unit_194 local_hp=13.9 vs remote_hp=18.9
+  HP_RACE: unit_191 local_hp=7.2 vs remote_hp=9.7
+  HP_RACE: unit_194 local_hp=15.1 vs remote_hp=14.1
+  HP_RACE: unit_193 local_hp=10.6 vs remote_hp=20.5
+  HP_RACE: unit_192 local_hp=20.4 vs remote_hp=25.3
+  HP_RACE: unit_192 local_hp=20.5 vs remote_hp=25.5
+  HP_RACE: unit_193 local_hp=15.9 vs remote_hp=20.8
+  HP_RACE: unit_192 local_hp=28.2 vs remote_hp=15.7
+  HP_RACE: unit_192 local_hp=11.1 vs remote_hp=16.0
+  HP_RACE: unit_192 local_hp=6.2 vs remote_hp=16.2
+  HP_RACE: unit_193 local_hp=6.6 vs remote_hp=21.5
+  HP_RACE: unit_192 local_hp=16.4 vs remote_hp=13.8
+  HP_RACE: unit_193 local_hp=14.4 vs remote_hp=24.3
+  HP_RACE: unit_193 local_hp=14.7 vs remote_hp=19.7
+  HP_RACE: unit_193 local_hp=15.9 vs remote_hp=19.9
+  HP_RACE: unit_193 local_hp=6.1 vs remote_hp=20.0
+  HP_RACE: unit_193 local_hp=10.2 vs remote_hp=20.2
+
+[V1 NETWORK METRICS]
+Duration: 89.53s
+Messages sent: 115758
+Messages received: 87975
+Avg latency: 0.00ms
+Total race conditions: 1463
+Total state mismatches: 1463
