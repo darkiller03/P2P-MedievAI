@@ -297,8 +297,12 @@ static void free_connection_list(ConnectionList *list) {
 static void run_event_loop(SOCKET listen_sock, ConnectionList *connections) {
     printf("[INFO] P2P node started.\n");
     printf("[INFO] newline-delimited protocol examples:\n");
-    printf("[INFO]   MOVE|player1|10|5\n");
-    printf("[INFO]   ATTACK|player1|enemy2\n");
+    printf("[INFO]   HELLO|python|player1\n");
+    printf("[INFO]   PLAYER_JOINED|player1  (V1: announce arrival, trigger state sync)\n");
+    printf("[INFO]   INITIAL_STATE_SYNC|player1|unit_id|x|y|hp|attack|range|speed|unit_type  (V1: synchronize snapshots)\n");
+    printf("[INFO]   MOVE|player1|unit_id|x|y\n");
+    printf("[INFO]   ATTACK|player1|attacker_id|target_id\n");
+    printf("[INFO]   STATE|player1|unit_id|x|y|hp|alive|target_id\n");
 
     while (1) {
         fd_set read_set;
