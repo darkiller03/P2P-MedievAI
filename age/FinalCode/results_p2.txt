@@ -1,9 +1,6 @@
 Battle data from pygame view
-Engine ticks: 32.32
-Winner: PLAYER 1 (RED)
+Engine ticks: 15.85
 Events:
-   Unit 3 (P2) died at tick 21.22
-   Unit 4 (P2) died at tick 32.32
 
 [V1 NETWORK INCONSISTENCY REPORT]
 Total inconsistencies: 0
@@ -14,8 +11,8 @@ Total inconsistencies: 0
 Inconsistency log:
 
 [V1 NETWORK METRICS]
-Duration: 25.72s
-Messages sent: 846
+Duration: 9.82s
+Messages sent: 200
 Messages received: 0
 Avg latency: 0.00ms
 Total race conditions: 0

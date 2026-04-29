@@ -1,0 +1,35 @@
+Battle data from pygame view
+Engine ticks: 361.95
+Events:
+   Unit 1 (P1) died at tick 12.52
+
+[V1 NETWORK INCONSISTENCY REPORT]
+Total inconsistencies: 15
+  Position races: 2
+  HP races: 13
+  Alive races: 0
+
+Inconsistency log:
+  POSITION_RACE: unit_1 local=55.0,59.0 vs remote=63.9,59.0 dist=8.85
+  POSITION_RACE: unit_2 local=53.5,61.0 vs remote=59.9,59.9 dist=6.49
+  HP_RACE: unit_1 local_hp=41.0 vs remote_hp=46.0
+  HP_RACE: unit_1 local_hp=46.0 vs remote_hp=41.0
+  HP_RACE: unit_1 local_hp=32.0 vs remote_hp=37.0
+  HP_RACE: unit_1 local_hp=37.0 vs remote_hp=32.0
+  HP_RACE: unit_1 local_hp=27.0 vs remote_hp=32.0
+  HP_RACE: unit_1 local_hp=32.0 vs remote_hp=23.0
+  HP_RACE: unit_1 local_hp=19.0 vs remote_hp=23.0
+  HP_RACE: unit_1 local_hp=18.0 vs remote_hp=23.0
+  HP_RACE: unit_1 local_hp=23.0 vs remote_hp=18.0
+  HP_RACE: unit_1 local_hp=18.0 vs remote_hp=14.0
+  HP_RACE: unit_1 local_hp=10.0 vs remote_hp=14.0
+  HP_RACE: unit_1 local_hp=9.0 vs remote_hp=14.0
+  HP_RACE: unit_1 local_hp=14.0 vs remote_hp=9.0
+
+[V1 NETWORK METRICS]
+Duration: 358.95s
+Messages sent: 7376
+Messages received: 3814
+Avg latency: 0.00ms
+Total race conditions: 15
+Total state mismatches: 15
