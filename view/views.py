@@ -167,7 +167,7 @@ class GUI:
         self.grass_tiles = {'normal': [], 'high': [], 'low': []}
 
         try:
-            tileset = pygame.image.load("assets/ground_grasses.png").convert_alpha()
+            tileset = pygame.image.load("assets/background/grass.png").convert_alpha()
             ts_width, ts_height = tileset.get_size()
 
             slice_w = 128

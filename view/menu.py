@@ -22,7 +22,7 @@ from model.terrain import TERRAIN_TYPES
 from presenter.ai import CaptainBraindead, MajorDaft, AssasinJack, PredictEinstein
 from presenter.smartAI import GeneralStrategus
 from .views import GUI
-from network_ipc import IPCClient
+from NetworkBridge import IPCClient
 import subprocess
 
 SCREEN_WIDTH = 800
@@ -192,7 +192,7 @@ class MainMenu:
         self.font_small = _get_font("agmena paneuropean book", 16)
         self.font_tiny = _get_font("agmena paneuropean book", 14)
         try:
-            bg_path = "assets/menu_background/Elden-Ring-Logo-Font-Custom-Background-Art-Only.jpg"
+            bg_path = "assets/background/Elden-Ring-Logo-Font-Custom-Background-Art-Only.jpg"
             if os.path.exists(bg_path):
                 self.bg_raw = pygame.image.load(bg_path).convert()
             else:
@@ -252,13 +252,8 @@ class MainMenu:
         self.btn_zone4 = Button(0, 0, 1, 1, "", self.font_small)
         self.multi_remote_ready = False
         self.multi_remote_choice = None # { "ia": ..., "zone": ... }
-        try:
-             p_img = pygame.image.load("assets/Pointer/attack48x48 (Copy).webp").convert_alpha()
-             self.pointer_img = pygame.transform.scale(p_img, (32, 32))
-        except Exception as e:
-             print(f"Menu Pointer Error: {e}")
-             self.pointer_img = None
         
+        self.pointer_img = None
         pygame.mouse.set_visible(True)
 
         self.recalc_layout()

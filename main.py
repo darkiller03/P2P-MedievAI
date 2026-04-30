@@ -11,9 +11,6 @@ from presenter.smartAI import GeneralStrategus
 TEAM_INFO = {
     "A": {"name": "Kingdom of the North", "color": "Bleu", "ia": "MajorDaft (agressive)"},
     "B": {"name": "Empire of the South", "color": "Rouge", "ia": "Captain BRAINDEAD (statique)"},
-    "C": {"name": "Smart Alliance", "color": "Vert", "ia": "GeneralStrategus (intelligente)"},
-    "D": {"name": "The Ripper Coven", "color": "Jaune", "ia": "AssasinJack (intelligente)"},
-    "E": {"name": "Soothsayers Scientists", "color": "Violet", "ia": "PredictEinstein (intelligente)"},
 }
 
 
